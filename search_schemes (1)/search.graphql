@@ -1,0 +1,140 @@
+fragment imageFr on Image {
+    eventId
+    filename
+    id
+    originalFilename
+    path
+    rejectionReason
+    sequence
+    status
+}
+
+fragment giftFr on Gift {
+    amount
+    currency
+    filename
+    id
+    name
+    type
+}
+
+fragment userGiftFr on UserGift {
+    gift {
+        ...giftFr
+    }
+    giftId
+    giverId
+    id
+    isShowOnProfile
+    recipientId
+}
+
+fragment userFr on User {
+    aboutMe
+    alcohol
+    avatar {
+        ...imageFr
+    }
+    birthday
+    children
+    city
+    country
+    datingPurpose
+    resolutionType
+    distance
+    education
+    email
+    eyes
+    firstname
+    gender
+    geoLocation
+    greeting
+    hairs
+    hasLike
+    height
+    id
+    images {
+        ...imageFr
+    }
+    incomeFrom
+    interests
+    languages
+    lastTimeDialogOnline
+    lastname
+    living
+    maritalStatus
+    movies
+    phoneNumber
+    physique
+    position
+    religion
+    serials
+    smoking
+    specialization
+    status {
+        rejectionReason
+        value
+    }
+    type
+    userGifts {
+        ...userGiftFr
+    }
+    weight
+}
+
+query FindInterestingUsers($filter: FindAllInput!) {
+    findInterestingUsers(filter: $filter) {
+        avatar {
+            ...imageFr
+        }
+        images {
+            ...imageFr
+        }
+        status {
+            rejectionReason
+            value
+        }
+        id
+        phoneNumber
+        ...userFr
+    }
+}
+
+query UserPreview($asVIP: Boolean!) {
+    userPreview(asVIP: $asVIP) {
+        avatar {
+            ...imageFr
+        }
+        images {
+            ...imageFr
+        }
+        status {
+            rejectionReason
+            value
+        }
+        id
+        phoneNumber
+        ...userFr
+    }
+}
+
+#query FindAllUsers($filter: FindAllInput!) {
+#    findAllUsers(filter: $filter) {
+#        avatar {
+#            ...imageFr
+#        }
+#        images {
+#            ...imageFr
+#        }
+#        status {
+#            rejectionReason
+#            value
+#        }
+#        id
+#        active
+#        phoneNumber
+#
+#        ...userFr
+#    }
+#}
+

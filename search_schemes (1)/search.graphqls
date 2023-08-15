@@ -1,0 +1,208 @@
+directive @key(fields: String!, resolvable: Boolean = true) on OBJECT | INTERFACE
+
+directive @extends on OBJECT | INTERFACE
+
+directive @external on OBJECT | FIELD_DEFINITION
+
+directive @requires(fields: String!) on FIELD_DEFINITION
+
+directive @provides(fields: String!) on FIELD_DEFINITION
+
+directive @shareable on FIELD_DEFINITION | OBJECT
+
+directive @link(url: String!, import: [link__Import]) on SCHEMA
+
+directive @tag(name: String!) on FIELD_DEFINITION | OBJECT | INTERFACE | UNION | ARGUMENT_DEFINITION | SCALAR | ENUM | ENUM_VALUE | INPUT_OBJECT | INPUT_FIELD_DEFINITION
+
+directive @inaccessible on FIELD_DEFINITION | OBJECT | INTERFACE | UNION | ARGUMENT_DEFINITION | SCALAR | ENUM | ENUM_VALUE | INPUT_OBJECT | INPUT_FIELD_DEFINITION
+
+directive @override(from: String!) on FIELD_DEFINITION
+
+type UserStatus {
+  value: UserStatusType!
+  rejectionReason: UserModerationRejectionReason
+}
+
+enum UserStatusType {
+  NO_ONBOARDING
+  NO_BASE_USER_INFO
+  ON_MODERATION
+  MODERATION_REJECTED
+  NO_PROFILE_USER_INFO
+  FULL_ACCESS
+}
+
+enum UserModerationRejectionReason {
+  NOT_LEGAL
+  NOT_THIS_PERSON
+  INVALID_DATA
+}
+
+type Image {
+  id: Int!
+  filename: String!
+  path: String!
+  originalFilename: String!
+  eventId: Int
+  userId: Int
+
+  """The status of the image"""
+  status: ImageStatus!
+
+  """The reason that image has been rejected"""
+  rejectionReason: String
+
+  """Order of the image. -1 for user means avatar"""
+  sequence: Int!
+}
+
+enum ImageStatus {
+  ACCEPTED
+  REJECTED
+  APPROVED
+  ON_MODERATION
+}
+
+type Gift {
+  id: Int!
+  type: GiftType!
+  name: String!
+  amount: Float!
+  currency: String!
+  filename: String!
+}
+
+enum GiftType {
+  GIFT
+  FLOWER
+}
+
+type UserGift {
+  id: Int!
+  giverId: Int!
+  recipientId: Int
+  expirationDate: DateTime
+  giftId: Int!
+  gift: Gift!
+  isShowOnProfile: Boolean
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type User {
+  id: Int!
+  phoneNumber: String
+  aboutMe: String
+  alcohol: String
+  birthday: DateTime
+  children: String
+  city: String
+  country: String
+  education: String
+  email: String
+  eyes: String
+  firstname: String
+  gender: String
+  hairs: String
+  interests: [String!]
+  languages: [String!]
+  lastname: String
+  maritalStatus: String
+  lastTimeDialogOnline: DateTime
+  avatar: Image
+  images: [Image!]
+  physique: String
+  position: String
+  religion: String
+  smoking: String
+  specialization: String
+  living: String
+  weight: Int
+  height: Int
+  geoLocation: GeoJSONPointScalar
+  status: UserStatus
+  pushToken: String
+  datingPurpose: String
+  greeting: String
+  movies: [String!]
+  serials: [String!]
+
+  """Financial position, this is the figure of earnings per month FROM"""
+  incomeFrom: Int
+  hasLike: Boolean
+  resolutionType: ResolutionType
+  distance: Float
+  userGifts: [UserGift!]
+  type: UserType
+}
+
+scalar GeoJSONPointScalar
+
+enum ResolutionType {
+  LIKE
+  DISLIKE
+}
+
+enum UserType {
+  REGULAR
+  VIP
+  WAIT
+}
+
+type Query {
+  findInterestingUsers(filter: FindAllInput!): [User!]!
+  userPreview(asVIP: Boolean = false): User!
+  findAllUsers(filter: FindAllInput!): [User!]! @deprecated(reason: "Use findInterestingUsers")
+  _service: _Service!
+}
+
+input FindAllInput {
+  size: Int = 20
+  page: Int = 1
+  id: Int
+  firstname: String
+  lastname: String
+  gender: String
+  ageFrom: Int
+  ageTo: Int
+
+  """The city of the user by default"""
+  city: String
+  alcohol: String
+  children: String
+  eyes: String
+  hairs: String
+  maritalStatus: String
+  physique: String
+  position: String
+  religion: String
+  smoking: String
+  living: String
+  datingPurpose: String
+  languages: [String!]
+  interests: [String!]
+  fromWeight: Int
+  toWeight: Int
+  fromHeight: Int
+  toHeight: Int
+  distance: Int
+  isNotResolved: Boolean
+
+  """Both has resolution with type LIKE"""
+  isMatchedUsers: Boolean
+  isMyLikeResolution: Boolean
+  isMeLikeResolution: Boolean
+}
+
+scalar link__Import
+
+scalar _FieldSet
+
+scalar _Any
+
+type _Service {
+  sdl: String
+}
