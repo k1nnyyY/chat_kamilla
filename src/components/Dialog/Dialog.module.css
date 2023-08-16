@@ -1,0 +1,48 @@
+.main {
+    max-width: 42vw;
+    min-width: 42vw;
+    min-height: 80vh;
+    max-height: 80vh;
+    margin-left: 20px;
+    /* padding: 1vw; */
+    border-radius: 2%;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;
+    background-color: #1D1D1D;
+    margin-top: 14.5vh;
+
+}
+
+.main__head {
+    background-color: #222224;
+    border-radius: 8px;
+    min-height: 8vh;
+    max-height: 8vh;
+    min-width: 100%;
+    padding: 1vh;
+    display: flex;
+    align-items: center;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;
+}
+
+.main__head_username {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    margin-left: 10px;
+}
+
+.main__head_avatar {
+    width: 5.5vh;
+    height: 5.5vh;
+    margin-left: 1vh;
+    border-radius: 50%;
+}
+
+.main__content {
+    min-height: 64vh;
+    max-height: 64vh;
+}
