@@ -27,7 +27,7 @@ function App() {
   return (
     <>
       <ChatPage />
-      <div>
+      {/* <div>
         <img src={user.avatar.path} alt="User Avatar" />
       </div>
       <h1>
@@ -35,7 +35,7 @@ function App() {
       </h1>
       <p>ID: {user.id}</p>
       <p>Phone: {user.phoneNumber}</p>
-      <p>Status: {user.status.value}</p>
+      <p>Status: {user.status.value}</p> */}
     </>
   );
 }
