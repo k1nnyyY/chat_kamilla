@@ -1,0 +1,312 @@
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+type Audio {
+  id: Int!
+  filename: String!
+  path: String!
+  originalFilename: String!
+  uploaderId: Int
+}
+
+type Call {
+  id: Int!
+  callerId: Int!
+  calleeId: Int!
+  sessionId: String!
+  type: CallType!
+  finishedAt: DateTime
+  startedAt: DateTime
+  """In seconds"""
+  duration: Int
+  createdAt: DateTime!
+}
+
+enum CallType {
+  AUDIO
+  VIDEO
+}
+
+input ChangeRendezvousStateInput {
+  rendezvousId: Int!
+  state: RendezvousState!
+}
+
+type ChatRoom {
+  id: Int!
+  title: String!
+  description: String
+  amountParticipants: Int!
+  picture: String
+  lastMessage: Int
+  """First 20 users"""
+  participants: [User!]
+  """Last message entity"""
+  message: Message
+}
+
+type CompanionCondition {
+  isOnline: Boolean!
+  companion: Int!
+  dialogToken: String!
+  lastTimeDialogOnline: DateTime
+}
+
+"""A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format."""
+scalar DateTime
+
+type Dialog {
+  token: String!
+  lastMessage: Int
+  users: [Int!]!
+  createdAt: DateTime!
+  rendezvousId: Int
+  """Companion id"""
+  _companion: Int
+  """Companion entity"""
+  companion: User
+  """Last message entity"""
+  message: Message
+  type: DialogType!
+  isBlocked: Boolean
+}
+
+enum DialogType {
+  REGULAR
+  INCOGNITO
+}
+
+scalar GeoJSONPointScalar
+
+type Gift {
+  id: Int!
+  type: GiftType!
+  name: String!
+  amount: Float!
+  currency: String!
+  filename: String!
+}
+
+enum GiftType {
+  GIFT
+  FLOWER
+}
+
+type Image {
+  id: Int!
+  filename: String!
+  path: String!
+  originalFilename: String!
+  eventId: Int
+  userId: Int
+  relativeId: Int
+  """The status of the image"""
+  status: ImageStatus!
+  """The reason that image has been rejected"""
+  rejectionReason: String
+  """Order of the image. -1 for user means avatar"""
+  sequence: Int!
+}
+
+enum ImageStatus {
+  ACCEPTED
+  REJECTED
+  APPROVED
+  ON_MODERATION
+}
+
+input InviteToRendezvousInput {
+  """User you want to invite"""
+  inviteeId: Int!
+  """Kinopoisk Id"""
+  movieId: String
+  type: RendezvousType = MOVIE
+}
+
+type Message {
+  id: Int!
+  message: String
+  ownerId: Int
+  owner: User
+  isRead: Boolean!
+  """Dialog's token"""
+  dialog: String
+  createdAt: DateTime!
+  imageId: Int
+  image: Image
+  userGiftId: Int
+  userGift: UserGift
+  rendezvousId: Int
+  rendezvous: Rendezvous
+  audioId: Int
+  audio: Audio
+  callId: Int
+  chatRoomId: Int
+  call: Call
+  dialogType: DialogType
+  """If companion hangs up the call"""
+  companionHangUp: Boolean
+  isRevealIdentity: Boolean
+}
+
+type Mutation {
+  inviteToRendezvous(input: InviteToRendezvousInput!): Rendezvous!
+  revealIdentity(rendezvousId: Int!): Boolean!
+  rendezvousChangeState(input: ChangeRendezvousStateInput!): Boolean!
+  deleteDialog(dialogToken: String!): Boolean!
+  sendMessage(input: SendMessageInput!): Message!
+  readMessages(messagesId: [Int!]!): Boolean!
+  showOnProfile(userGiftId: Int!): Boolean!
+  sendGift(recipientId: Int, dialog: String, giftId: Int!): UserGift
+}
+
+type Query {
+  getChatRooms: [ChatRoom!]
+  getChatRoom(chatRoomId: Int!): ChatRoom
+  getChatRoomParticipants(size: Int = 20, page: Int = 1, chatRoomId: Int!): [User!]
+  getMyDialogs: [Dialog!]
+  getDialogByCompanion(
+    """Companion (user) ID"""
+    companion: Int!
+  ): Dialog
+  getMessages(
+    page: Int = 1
+    size: Int = 20
+    """Dialog token"""
+    dialog: String
+    chatRoomId: Int
+  ): [Message!]
+  getUserGift(userGiftId: Int!): UserGift
+  getGifts(type: GiftType): [Gift!]
+}
+
+type Rendezvous {
+  id: Int!
+  movieId: String
+  room: String!
+  inviterId: Int
+  inviteeId: Int!
+  createdAt: DateTime!
+  type: RendezvousType!
+}
+
+type RendezvousProcess {
+  state: RendezvousState!
+}
+
+enum RendezvousState {
+  USER_CAN_START_WATCH_VIDEO
+  USER_HAS_LEFT
+  USER_HAS_PAUSED_THE_VIDEO
+}
+
+enum RendezvousType {
+  MOVIE
+  INCOGNITO
+}
+
+input SendMessageInput {
+  message: String!
+  """Companion id"""
+  companion: Int
+  dialogToken: String
+  chatRoomId: Int
+}
+
+type Subscription {
+  """
+  Юзер получает ссылку на кино, отправляет запрос на подписку по свиданию (rendezvousProcess).
+  Сама подписка по сути гоняет между собой енам с состояниями. Если второй не подлючился то ждём ничего никому не отсылаем.
+  Второй заходит и обоим шлём что могут начать просмотр (USER_CAN_START_WATCH_VIDEO).
+  Для изменения состояния свидания есть мутация rendezvousChangeState.
+  Юзер А отправляет в мутацию USER_HAS_PAUSED_THE_VIDEO,
+  сервер шлёт юзеру Б это состояния. Если у юзера отвалился интернет или он вышел второму присылается USER_HAS_LEFT.
+  Если юзер восстанавливает связь ему нужно заного подписаться (rendezvousProcess) и обоим эмитится USER_CAN_START_WATCH_VIDEO.
+  """
+  rendezvousProcess(rendezvousId: Int!): RendezvousProcess!
+  chatRoomSub(chatRoomId: Int!): Message
+  companionCondition: CompanionCondition!
+  receiveMessage: Message!
+}
+
+type User {
+  id: Int!
+  phoneNumber: String
+  aboutMe: String
+  alcohol: String
+  birthday: DateTime
+  children: String
+  city: String
+  country: String
+  education: String
+  email: String
+  eyes: String
+  firstname: String
+  gender: String
+  hairs: String
+  interests: [String!]
+  languages: [String!]
+  lastname: String
+  maritalStatus: String
+  lastTimeDialogOnline: DateTime
+  avatar: Image
+  images: [Image!]
+  physique: String
+  position: String
+  religion: String
+  smoking: String
+  specialization: String
+  living: String
+  weight: Int
+  height: Int
+  geoLocation: GeoJSONPointScalar
+  status: UserStatus
+  pushToken: String
+  datingPurpose: String
+  greeting: String
+  movies: [String!]
+  serials: [String!]
+  """Financial position, this is the figure of earnings per month FROM"""
+  incomeFrom: Int
+  isOnline: Boolean
+  type: UserType
+  distance: Float
+}
+
+type UserGift {
+  id: Int!
+  giverId: Int!
+  recipientId: Int
+  expirationDate: DateTime
+  giftId: Int!
+  gift: Gift!
+  isShowOnProfile: Boolean
+}
+
+enum UserModerationRejectionReason {
+  NOT_LEGAL
+  NOT_THIS_PERSON
+  INVALID_DATA
+}
+
+type UserStatus {
+  value: UserStatusType!
+  rejectionReason: UserModerationRejectionReason
+}
+
+enum UserStatusType {
+  NO_ONBOARDING
+  NO_BASE_USER_INFO
+  ON_MODERATION
+  MODERATION_REJECTED
+  NO_PROFILE_USER_INFO
+  FULL_ACCESS
+}
+
+enum UserType {
+  REGULAR
+  VIP
+}

@@ -1,0 +1,274 @@
+fragment imageFr on Image {
+    eventId
+    filename
+    id
+    originalFilename
+    path
+    rejectionReason
+    relativeId
+    sequence
+    status
+    userId
+}
+
+fragment userFr on User {
+    aboutMe
+    alcohol
+    avatar {
+        ...imageFr
+    }
+    birthday
+    children
+    city
+    country
+    datingPurpose
+    education
+    email
+    eyes
+    firstname
+    gender
+    geoLocation
+    greeting
+    hairs
+    height
+    id
+    isOnline
+    interests
+    languages
+    lastTimeDialogOnline
+    lastname
+    living
+    maritalStatus
+    physique
+    position
+    religion
+    serials
+    smoking
+    specialization
+    weight
+}
+
+fragment giftFr on Gift {
+    amount
+    currency
+    filename
+    id
+    name
+    type
+}
+
+fragment userGiftFr on UserGift {
+    gift {
+        ...giftFr
+    }
+    giftId
+    giverId
+    id
+    isShowOnProfile
+    recipientId
+}
+
+fragment dialogFr on Dialog {
+    _companion
+    companion {
+        id
+        firstname
+        lastname
+        lastTimeDialogOnline
+        avatar {
+            ...imageFr
+        }
+    }
+    createdAt
+    isBlocked
+    lastMessage
+    message {
+        ...messageFr
+    }
+    rendezvousId
+    token
+    users
+}
+
+fragment rendezvousFr on Rendezvous {
+    createdAt
+#    currency
+    id
+    inviteeId
+    inviterId
+    movieId
+#    price
+    room
+    type
+}
+
+fragment callFr on Call {
+    calleeId
+    callerId
+    createdAt
+    duration
+    finishedAt
+    id
+    sessionId
+    startedAt
+    type
+}
+
+fragment messageFr on Message {
+    audio {
+        filename
+        id
+        originalFilename
+        path
+        uploaderId
+    }
+    audioId
+    call {
+        ...callFr
+    }
+    callId
+    companionHangUp
+    createdAt
+    dialog
+    dialogType
+    id
+    image {
+        ...imageFr
+    }
+    imageId
+    isRead
+    isRevealIdentity
+    message
+    ownerId
+    owner {
+      avatar {
+        path
+      }
+      firstname
+    }
+    rendezvous {
+        ...rendezvousFr
+    }
+    rendezvousId
+    userGift {
+        gift {
+            name
+            type
+        }
+        giftId
+        giverId
+        id
+        recipientId
+        isShowOnProfile
+    }
+    userGiftId
+}
+
+mutation DeleteDialog($dialogToken: String!) {
+    deleteDialog(dialogToken: $dialogToken)
+}
+
+mutation InviteToRendezvous($input: InviteToRendezvousInput!) {
+    inviteToRendezvous(input: $input) {
+        ...rendezvousFr
+    }
+}
+
+mutation ReadMessages($messagesId: [Int!]!) {
+    readMessages(messagesId: $messagesId)
+}
+
+mutation RendezvousChangeState($input: ChangeRendezvousStateInput!) {
+    rendezvousChangeState(input: $input)
+}
+
+mutation SendGift($giftId: Int!, $recipientId: Int!,) {
+    sendGift(giftId: $giftId, recipientId: $recipientId) {
+        ...userGiftFr
+    }
+}
+
+mutation SendMessage($input: SendMessageInput!) {
+    sendMessage(input: $input) {
+        ...messageFr
+    }
+}
+
+mutation ShowOnProfile($userGiftId: Int!) {
+    showOnProfile(userGiftId: $userGiftId)
+}
+
+query GetDialogByCompanion($companion: Int!) {
+    getDialogByCompanion(companion: $companion) {
+        ...dialogFr
+    }
+}
+
+query GetGifts {
+    getGifts {
+        ...giftFr
+    }
+}
+
+query GetMessages($page: Int, $size: Int, $dialog: String, $chatRoomId: Int) {
+    getMessages(page: $page, size: $size, dialog: $dialog, chatRoomId: $chatRoomId) {
+        ...messageFr
+  }
+}
+
+query GetMyDialogs {
+    getMyDialogs {
+        ...dialogFr
+    }
+}
+
+query GetUserGift($userGiftId: Int!) {
+    getUserGift(userGiftId: $userGiftId) {
+        ...userGiftFr
+    }
+}
+
+query GetChatRooms {
+  getChatRooms {
+    id
+    description
+    message {
+      message
+      owner {
+        firstname
+        avatar {
+          path
+        }
+      }
+    }
+    picture
+    title
+    amountParticipants
+    participants {
+        avatar {
+            path
+        }
+        id
+        distance
+        firstname
+    }
+  }
+}
+
+subscription ReceiveMessage {
+    receiveMessage {
+        ...messageFr
+    }
+}
+
+subscription RendezvousProcess($rendezvousId: Int!) {
+    rendezvousProcess(rendezvousId: $rendezvousId) {
+        state
+    }
+}
+
+subscription ChatRoomSub($chatRoomId: Int!) {
+  chatRoomSub(chatRoomId: $chatRoomId) {
+    ...messageFr
+  }
+}
