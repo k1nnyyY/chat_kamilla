@@ -45,4 +45,5 @@
 .main__content {
     min-height: 64vh;
     max-height: 64vh;
+    overflow: scroll;
 }

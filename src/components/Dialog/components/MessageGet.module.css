@@ -1,0 +1,40 @@
+.main {
+    width: 100%;
+    height: auto;
+    padding: 1vh 2vh;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+.main__message {
+    width: auto;
+    max-width: 80%;
+    text-align: left;
+    height: auto;
+    padding: 1vh;
+    background-color: #3B3B44;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;
+    border-radius: 1.5vh;
+    font-size: 16px;
+    font-weight: 400;
+    display: flex;
+}
+
+.main__message_date {
+    min-height: 100%;
+    display: flex;
+    align-items: end;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.main__message_text {
+    max-width: 90%;
+    height: max-content;
+}

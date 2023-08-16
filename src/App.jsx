@@ -5,12 +5,12 @@ import ChatPage from "./pages/chatPage";
 import Logo from "./assets/logo.png";
 function App() {
 
-  const { loading, error, data } = useQuery(GET_MY_DIALOGS_QUERY);
+  // const { loading, error, data } = useQuery(GET_MY_DIALOGS_QUERY);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  // if (loading) return <p>Loading...</p>;
+  // if (error) return <p>Error: {error.message}</p>;
 
-  const dialogs = data.getMyDialogs;
+  // const dialogs = data.getMyDialogs;
 
 
   // const { loading, error, data } = useQuery(USER_PREVIEW_QUERY, {
