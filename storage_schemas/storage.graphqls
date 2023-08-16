@@ -1,0 +1,134 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Audio {
+  id: Int!
+  filename: String!
+  path: String!
+  originalFilename: String!
+  uploaderId: Int
+}
+
+input ChangeImageOrderInput {
+  imageId: Int!
+  sequence: Int!
+  eventId: Int
+}
+
+input CommentEventInput {
+  """Max files: 3"""
+  files: [Upload!] = []
+  comment: String!
+  eventId: Int!
+}
+
+type Image {
+  id: Int!
+  filename: String!
+  path: String!
+  originalFilename: String!
+  eventId: Int
+  userId: Int
+  relativeId: Int
+  eventCommentId: Int
+  """The status of the image"""
+  status: ImageStatus!
+  """The reason that image has been rejected"""
+  rejectionReason: String
+  """Order of the image. -1 for user means avatar"""
+  sequence: Int!
+}
+
+enum ImageStatus {
+  ACCEPTED
+  REJECTED
+  APPROVED
+  ON_MODERATION
+}
+
+type Mutation {
+  uploadImage(input: SaveImageInput!): Image!
+  sendImage(input: SendImageInput!): Image
+  uploadAvatar(input: SaveImageInput!): Image!
+  removeImage(id: Int!): Boolean!
+  changeImageOrder(input: ChangeImageOrderInput!): Boolean!
+  commentEvent(input: CommentEventInput!): Boolean!
+  sendAudio(input: SendAudioInput!): Audio
+  sendVideo(input: SendVideoInput!): Video
+}
+
+type Query {
+  findImageById(id: Int!): Image!
+}
+
+input SaveImageInput {
+  file: Upload!
+  eventId: Int
+  relativeId: Int
+  sequence: Int
+}
+
+input SendAudioInput {
+  file: Upload!
+  message: String
+  """Companion id"""
+  companion: Int
+  dialogToken: String
+  chatRoomId: Int
+  inReply: Int
+}
+
+input SendImageInput {
+  file: Upload!
+  message: String
+  """Companion id"""
+  companion: Int
+  dialogToken: String
+  chatRoomId: Int
+  inReply: Int
+}
+
+input SendVideoInput {
+  file: Upload!
+  message: String
+  """Companion id"""
+  companion: Int
+  dialogToken: String
+  chatRoomId: Int
+  isRealtime: Boolean = false
+  inReply: Int
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+enum UserModerationRejectionReason {
+  NOT_LEGAL
+  NOT_THIS_PERSON
+  INVALID_DATA
+}
+
+type UserStatus {
+  value: UserStatusType!
+  rejectionReason: UserModerationRejectionReason
+}
+
+enum UserStatusType {
+  NO_ONBOARDING
+  NO_BASE_USER_INFO
+  ON_MODERATION
+  MODERATION_REJECTED
+  NO_PROFILE_USER_INFO
+  FULL_ACCESS
+}
+
+type Video {
+  id: Int!
+  filename: String!
+  path: String!
+  originalFilename: String!
+  uploaderId: Int
+  isRealtime: Boolean
+}

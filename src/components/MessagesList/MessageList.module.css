@@ -3,7 +3,8 @@ input {
 }
   
 input[type="search"] {
-      -webkit-appearance: textfield;
+    appearance: textfield;
+    -webkit-appearance: textfield;
 }
   
 input[type="search"]::-webkit-search-decoration {

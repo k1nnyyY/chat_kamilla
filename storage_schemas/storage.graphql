@@ -1,0 +1,178 @@
+mutation UploadImage($input: SaveImageInput!) {
+    uploadImage(input: $input) {
+        eventId
+        id
+        path
+        sequence
+        status
+    }
+}
+
+mutation CommentEvent($input: CommentEventInput!) {
+  commentEvent(input: $input)
+}
+
+mutation UploadAvatar($input: SaveImageInput!) {
+    uploadAvatar(input: $input) {
+        eventId
+        id
+        path
+        status
+    }
+}
+
+mutation ChangeImageOrder($input: ChangeImageOrderInput!) {
+    changeImageOrder(input: $input)
+}
+
+mutation RemoveImage($id: Int!) {
+    removeImage(id: $id)
+}
+
+mutation SendImage($input: SendImageInput!) {
+    sendImage(input: $input) {
+        eventId
+        id
+        path
+        sequence
+        status
+    }
+}
+
+mutation SendAudio($input: SendAudioInput!) {
+    sendAudio(input: $input){
+        filename,
+        id,
+        originalFilename,
+        path,
+        uploaderId
+    }
+}
+
+query FindImageById($id: Int!) {
+    findImageById(id: $id) {
+        eventId
+        filename
+        id
+        originalFilename
+        path
+        rejectionReason
+        status
+    }
+}
+
+mutation SendVideo($input: SendVideoInput!) {
+  sendVideo(input: $input) {
+    filename
+    id
+    isRealtime
+    originalFilename
+    path
+    uploaderId
+  }
+}
+
+#mutation CreateEvent($createEventInput: CreateEventInput!) {
+#    createEvent(createEventInput: $createEventInput) {
+#        address
+#        amountParticipants
+#        creator
+#        description
+#        duration
+#        geoLocation
+#        id
+#        images {
+#            eventId
+#            filename
+#            id
+#            originalFilename
+#            path
+#            rejectionReason
+#            status
+#        }
+#        isAllowShowParticipants
+#        name
+#        participants {
+#            about_me
+#            active
+#            birthday
+#            city
+#            email
+#            id
+#            phone_number
+#        }
+#        rejectionReason
+#        startDatetime
+#        status
+#        tags
+#        type
+#        user {
+#            about_me
+#            active
+#            birthday
+#            city
+#            email
+#            id
+#            phone_number
+#        }
+#    }
+#}
+#
+#query FindAllEvents($coordinates: JSONObject, $creator: String, $status: event_status, $type: event_type, $page: Int = 1, $size: Int = 20) {
+#    findAllEvents(coordinates: $coordinates, creator: $creator, status: $status, type: $type, page: $page, size: $size) {
+#        address
+#        amountParticipants
+#        creator
+#        description
+#        duration
+#        geoLocation
+#        id
+#        images {
+#            eventId
+#            filename
+#            id
+#            originalFilename
+#            path
+#            rejectionReason
+#            status
+#        }
+#        isAllowShowParticipants
+#        name
+#        participants {
+#            about_me
+#            active
+#            birthday
+#            city
+#            email
+#            id
+#            phone_number
+#        }
+#        rejectionReason
+#        startDatetime
+#        status
+#        tags
+#        type
+#        user {
+#            about_me
+#            active
+#            birthday
+#            city
+#            email
+#            id
+#            phone_number
+#        }
+#  }
+#}
+#
+##query FindInteresting($ageFrom: Float, $ageTo: Float, $firstname: String, $gender: String, $lastname: String, $page: Int = 1, $size: Int = 20) {
+##    findInteresting(ageFrom: $ageFrom, ageTo: $ageTo, firstname: $firstname, gender: $gender, lastname: $lastname, page: $page, size: $size) {
+##        about_me
+##        active
+##        birthday
+##        city
+##        email
+##        id
+##        phone_number
+##    }
+##}
+#
