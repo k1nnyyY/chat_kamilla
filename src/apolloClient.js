@@ -13,7 +13,7 @@ const authLink = new ApolloLink((operation, forward) => {
 });
 
 const httpLink = new HttpLink({
-  uri: 'https://korpustage.ru/search'
+  uri: 'https://korpustage.ru/dialogs'
 });
 
 const storageLink = new HttpLink({
@@ -21,7 +21,7 @@ const storageLink = new HttpLink({
 });
 
 const dialogsLink = new HttpLink({
-  uri: 'https://korpustage.ru/dialogs'
+  uri: 'https://korpustage.ru/search'
 });
 
 // Объединение всех ссылок

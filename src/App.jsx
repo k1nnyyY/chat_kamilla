@@ -1,18 +1,18 @@
 // App.jsx
 import { useQuery } from "@apollo/client";
-import { USER_PREVIEW_QUERY, GET_MY_DIALOGS_QUERY } from "./query/queries";
+import { USER_PREVIEW_QUERY, GET_MY_DIALOGS_QUERY, GET_CHAT_ROOMS_QUERY } from "./query/queries";
 import ChatPage from "./pages/chatPage";
 import Logo from "./assets/logo.png";
 function App() {
 
-  // const { loading, error, data } = useQuery(GET_MY_DIALOGS_QUERY);
+  const { loading, error, data } = useQuery(GET_CHAT_ROOMS_QUERY);
 
-  // if (loading) return <p>Loading...</p>;
-  // if (error) return <p>Error: {error.message}</p>;
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
 
-  // const dialogs = data.getMyDialogs;
+  const dialogs = data.getChatRooms;
 
-
+  console.log(dialogs)
   // const { loading, error, data } = useQuery(USER_PREVIEW_QUERY, {
   //   variables: { asVIP: false },
   // });
@@ -27,7 +27,7 @@ function App() {
   return (
     <>
       <ChatPage />
-      {/* <div>
+      <div>
         <img src={user.avatar.path} alt="User Avatar" />
       </div>
       <h1>
@@ -35,7 +35,7 @@ function App() {
       </h1>
       <p>ID: {user.id}</p>
       <p>Phone: {user.phoneNumber}</p>
-      <p>Status: {user.status.value}</p> */}
+      <p>Status: {user.status.value}</p>
     </>
   );
 }
