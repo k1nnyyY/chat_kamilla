@@ -54,8 +54,8 @@ h6 {
 }
 
 .main__text {
-    min-width: 70%;
-    max-width: 70%;
+    min-width: 65%;
+    max-width: 65%;
     margin-left: 10px;
 }
 
@@ -63,6 +63,8 @@ h6 {
     font-size: 12px;
     font-weight: 400;
     color: #7F8FA6;
+    width: max-content;
+    text-align: right;
 }
 
 .main__text_message {

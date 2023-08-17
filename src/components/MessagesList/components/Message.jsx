@@ -1,15 +1,19 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
+import { format, isToday, parseISO } from 'date-fns';
 import styles from './Message.module.css';
 const Message = (props) => {
   const data = props.info;
   const inputDateString = data.message.createdAt;
-  const date = new Date(inputDateString);
+  const date = parseISO(inputDateString); // Преобразуем строку в объект Date
+  console.log(inputDateString)
+  // Проверяем, сегодняшняя ли это дата
+  const isTodayDate = isToday(date);
+  console.log(inputDateString)
 
-  const hours = date.getUTCHours();
-  const minutes = date.getUTCMinutes();
-  console.log(date)
-  const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-
+  // Форматируем дату в зависимости от того, сегодняшняя она или нет
+  const formattedTime = isTodayDate
+    ? format(date, 'HH:mm') // Сегодня - часы и минуты
+    : format(date, 'd MMMM');
   return (
     
     <div className={props.status===0?styles.main:styles.main_active}>

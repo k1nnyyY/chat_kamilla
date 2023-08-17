@@ -1,6 +1,6 @@
 // App.jsx
 import { useQuery } from "@apollo/client";
-import { USER_PREVIEW_QUERY, GET_MY_DIALOGS_QUERY, GET_CHAT_ROOMS_QUERY,GET_MESSAGES_QUERY } from "./query/queries";
+import { USER_PREVIEW_QUERY, GET_MY_DIALOGS_QUERY, GET_CHAT_ROOMS_QUERY } from "./query/queries";
 import ChatPage from "./pages/chatPage";
 function App() {
 

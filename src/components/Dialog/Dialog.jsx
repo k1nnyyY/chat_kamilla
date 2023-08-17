@@ -3,6 +3,9 @@ import styles from './Dialog.module.css';
 import CusDate from './components/Date';
 import MessageSend from './components/MessageSend';
 import MessageGet from './components/MessageGet';
+import { useMutation } from '@apollo/client';
+import { SEND_MESSAGE_MUTATION } from '../../query/queries.js';
+import { format } from 'date-fns';
 
 import Add from '../../assets/Add.png'
 import Send from '../../assets/Send.png';
@@ -12,18 +15,31 @@ const Dialog = (props) => {
   const [animateBorder, setAnimateBorder] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null); // Новое состояние
   const [rotateAddImage, setRotateAddImage] = useState(false);
+  const [selectedImagePreview, setSelectedImagePreview] = useState(null);
+
+
+  let currentDate = '';
+  let stepDate = '';
 
   const handleImageUpload = (e) => {
       const newSelectedImage = e.target.files[0];
       if (newSelectedImage) {
         setSelectedImage(newSelectedImage);
+        setSelectedImagePreview(URL.createObjectURL(newSelectedImage));
         setRotateAddImage(true);
         console.log('Выбрано изображение:', newSelectedImage);
       } else {
         setSelectedImage(null);
+        setSelectedImagePreview(null);
         setRotateAddImage(false);
       }
-  };    
+  };  
+  
+  const handleClearFiles = () => {
+    setSelectedImage(null);
+    setSelectedImagePreview(null);
+    setRotateAddImage(false);
+}
   
   
   const handleMessage = (e) => {
@@ -37,20 +53,44 @@ const Dialog = (props) => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (message.trim() === '' && selectedImage===null) {
+      if(animateBorder){
+        return
+      }
       setAnimateBorder(true); // Устанавливаем состояние анимации
       setTimeout(() => {
         setAnimateBorder(false); // Сбрасываем состояние анимации через секунду
       }, 1000);
     } else {
+      console.log(props.dialog)
+      try {
+        const response = await sendMessageMutation({
+          variables: {
+            input: {
+              message: message,
+              companion: props.dialog.companion.id,
+              dialogToken: props.dialog.token,
+            },
+          },
+        });
+        // Do something with the response if needed
+
+        // console.log('Message sent:', response.data.sendMessage);
+        reversedMessages.push(reversedMessages[0]);
+        console.log('HEEEEE',reversedMessages)
+      } catch (error) {
+        // Handle errors if needed
+        console.error('Error sending message:', error);
+      }
       console.log(selectedImage, message);
       setSelectedImage(null)
       setRotateAddImage(false);
+      setSelectedImagePreview(null)
       setMessage('');
     }
   }
-  const reversedMessages = props.messages.getMessages ? props.messages.getMessages.slice().sort((a, b) => {
+  let reversedMessages = props.messages.getMessages ? props.messages.getMessages.slice().sort((a, b) => {
     return new Date(a.createdAt) - new Date(b.createdAt);
   })
   : null;
@@ -63,10 +103,11 @@ const Dialog = (props) => {
       console.log(props)
     }
   }, [reversedMessages]);
+  const [sendMessageMutation] = useMutation(SEND_MESSAGE_MUTATION);
 
   return (
     <div className={styles.main}>
-      <div className={styles.main__head}>
+      <div className={styles.main__head_top}>
         {
           props.dialog?
           <>
@@ -91,20 +132,40 @@ const Dialog = (props) => {
             }
             const inputDateString = el.createdAt;
             const date = new Date(inputDateString);
-          
-            const hours = date.getUTCHours();
-            const minutes = date.getUTCMinutes();
-            console.log(props.messages)
-            const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
             
+            console.log(props.messages)
+            const formattedTime = format(date, 'HH:mm');
+            const formattedDate = format(date, 'dd-MM-yyyy');
+            currentDate = stepDate;
+            if(formattedDate!==currentDate){
+              stepDate = formattedDate;
+            }
             if(el.ownerId===1){
               return(
-                <MessageSend key={i} image={el.image} text={el.message} time={formattedTime}/>
+                
+                  formattedDate!==currentDate?
+                  <>
+                  <CusDate date={el.createdAt}/>
+                  <MessageSend key={i} image={el.image} text={el.message} time={formattedTime}/>
+                  </>
+                  :
+                  <>
+                  <MessageSend key={i} image={el.image} text={el.message} time={formattedTime}/>
+                  </>
+                
               )
             }
             return(
-              <MessageGet key={i} image={el.image}text={el.message} time={formattedTime}/>
-            )
+              formattedDate!==currentDate?
+              <>
+              <CusDate date={el.createdAt}/>
+              <MessageGet key={i} image={el.image} text={el.message} time={formattedTime}/>
+              </>
+              :
+              <>
+              <MessageGet key={i} image={el.image} text={el.message} time={formattedTime}/>
+              </>
+        )
           })
 
           }
@@ -112,23 +173,45 @@ const Dialog = (props) => {
         }
       </div>
       <div className={styles.main__head}>
+      {selectedImagePreview && (
+              <div className={styles.selectedImagePreview}>
+                <img src={selectedImagePreview} alt="Selected" className={styles.previewImage} />
+              </div>
+            )}
+
+
         {
+          selectedImage?
+          
+          <div className={styles.main__head_filename}>
+            {selectedImage.name}
+          </div>
+          :
+          ''
+        }
+      
+        {
+          
           props.dialog?
-          <>
-<label htmlFor="imageInput" className={`${styles.imageInputWrapper} ${rotateAddImage ? styles.rotateImage : ''}`}>
-  <img src={Add} className={`${styles.main__head_add} ${selectedImage ? styles.selectedImage : ''}`} alt="Add Image" />
-  <input
-    type="file"
-    id="imageInput"
-    className={styles.hiddenInput}
-    onChange={handleImageUpload}
-  />
-</label>
+          <div className={styles.main__head_div}>
+          <label htmlFor="imageInput" className={`${styles.imageInputWrapper} ${rotateAddImage ? styles.rotateImage : ''}`}>
+            <img src={Add} onClick={selectedImage?handleClearFiles:''} className={`${styles.main__head_add} ${selectedImage ? styles.selectedImage : ''}`} alt="Add Image" />
+            {
+              selectedImage?
+              <></>
+              :
+            <input
+              type="file"
+              accept="image/jpeg"
+              id="imageInput"
+              className={styles.hiddenInput}
+              onChange={handleImageUpload}
+            />
+            }
+          </label>
           <input type="text" value={message} onKeyDown={handleKeyDown} onChange={e=>handleMessage(e)}  className={`${styles.main__head_input} ${animateBorder ? styles.animate_border : ''}`} placeholder='Введите сообщение...'/>
-          
           <img src={Send} onClick={handleSubmit} className={styles.main__head_send} alt="" />
-          
-          </>
+          </div>
           :
           <></>
         }

@@ -247,6 +247,7 @@ export const SEND_MESSAGE_MUTATION = gql`
       ...messageFr
     }
   }
+  ${MESSAGE_FRAGMENT}
 `;
 
 export const SHOW_ON_PROFILE_MUTATION = gql`

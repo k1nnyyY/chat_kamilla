@@ -1,7 +1,12 @@
-import React from 'react';
+import React, {useState} from 'react';
 import styles from './MessageSend.module.css';
 
 const MessageSend = (props) => {
+  const [isImageFullscreen, setIsImageFullscreen] = useState(false); // Состояние для увеличенного изображения
+
+  const handleImageClick = () => {
+    setIsImageFullscreen(!isImageFullscreen);
+  };
 
 
   return (
@@ -13,7 +18,7 @@ const MessageSend = (props) => {
                 <></>
                 :
                 <>
-                <img src={`https://storage.yandexcloud.net/${props.image.path}`} className={styles.image} alt="" />
+                <img src={`https://storage.yandexcloud.net/${props.image.path}`} onClick={handleImageClick} className={styles.image} alt="" />
                 <div className={styles.main__message_date_image}>
                 {props.time}
                 </div>
@@ -31,6 +36,16 @@ const MessageSend = (props) => {
                 <></>
             }
         </div>
+        {isImageFullscreen && props.image !== null && (
+        <div className={styles.imageFullscreenBackdrop} onClick={handleImageClick}>
+          <img
+            src={`https://storage.yandexcloud.net/${props.image.path}`}
+            className={styles.imageFullscreen}
+            alt=""
+          />
+        </div>
+      )}
+
     </div>
   )
 }

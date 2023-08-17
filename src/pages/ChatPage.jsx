@@ -8,7 +8,6 @@ import { GET_MESSAGES_QUERY } from "./../query/queries";
 const ChatPage = (props) => {
   const [selectedDialogToken, setSelectedDialogToken] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [selectedDialog, setSelectedDialog] = useState(null);
 
   const { loading: loadingMessages, error: errorMessages, data: dataMessages } = useQuery(GET_MESSAGES_QUERY, {
     variables: {
