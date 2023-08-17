@@ -24,14 +24,15 @@ const dialogsLink = new HttpLink({
 
 // Объединение всех ссылок
 const link = ApolloLink.split(
-  operation => operation.operationName === 'storageOperation',
+  operation => operation.getContext().role === 'storage',
   authLink.concat(storageLink),
   ApolloLink.split(
-    operation => operation.operationName === 'dialogsOperation',
+    operation => operation.getContext().role === 'dialogs',
     authLink.concat(dialogsLink),
-    authLink.concat(httpLink)
+    authLink.concat(httpLink)  // По умолчанию для 'search'
   )
 );
+
 
 
 const client = new ApolloClient({

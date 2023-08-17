@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import styles from './Message.module.css';
-import Avatar from '../images/avatar_h.jpg';
 const Message = (props) => {
   const data = props.info;
   const inputDateString = data.message.createdAt;

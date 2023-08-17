@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
 import styles from './Dialog.module.css';
-import Avatar from '../MessagesList/images/avatar_h.jpg';
 import CusDate from './components/Date';
 import MessageSend from './components/MessageSend';
 import MessageGet from './components/MessageGet';
