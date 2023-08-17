@@ -70,7 +70,41 @@
 .main__head_input:focus {
     outline: none;
 }
+/* ... остальные стили ... */
 
+.imageInputWrapper {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .imageInputWrapper img {
+    display: block;
+    width: 30px; /* Замените на нужную ширину */
+    height: 20px; /* Замените на нужную высоту */
+    
+  }
+  
+  .hiddenInput {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+  
+.animate_border {
+    animation: borderAnimation 1s;
+    border: 1px solid red;
+  }
+  
+  @keyframes borderAnimation {
+    0% {
+      border-color: rgb(123, 63, 63);
+    }
+    100% {
+        border: 1px solid #2B3137;
+    }
+  }
 input {
     padding: 0;
 }
@@ -83,3 +117,53 @@ input[type="text"] {
 input[type="text"]::-webkit-search-decoration {
       -webkit-appearance: none;
 }
+
+.main__head_send {
+    min-height: 3.5vh;
+    max-height: 3.5vh;
+    margin-left: 2vh;
+    margin-right: 1vh;
+    cursor: pointer;
+    transform: scale(.9);
+    transition: all .3s;
+    -webkit-transition: all .3s;
+}
+
+.main__head_send:hover {
+    transform: scale(1);
+}
+
+.main__content_nothing {
+    width: 100%;
+    min-height: 64vh;
+    display: flex;
+    font-size: larger;
+    color: #3e474f;
+    align-items: center;
+    justify-content: center;
+}
+
+.main__head_add {
+    min-height: 3.5vh;
+    max-height: 3.5vh;
+    margin-left: 1vh;
+    margin-right: 2vh;
+    cursor: pointer;
+    transform: scale(.9);
+    transition: all .3s;
+    -webkit-transition: all .3s;
+
+}
+
+.main__head_add:hover {
+    transform: scale(1);
+}
+
+.rotateImage img {
+    transform: rotate(45deg);
+    transition: transform 0.3s;
+  }
+  
+  .selectedImage {
+  }
+  

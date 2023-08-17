@@ -4,7 +4,52 @@ import CusDate from './components/Date';
 import MessageSend from './components/MessageSend';
 import MessageGet from './components/MessageGet';
 
+import Add from '../../assets/Add.png'
+import Send from '../../assets/Send.png';
+
 const Dialog = (props) => {
+  const [message, setMessage] = useState('');
+  const [animateBorder, setAnimateBorder] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null); // Новое состояние
+  const [rotateAddImage, setRotateAddImage] = useState(false);
+
+  const handleImageUpload = (e) => {
+      const newSelectedImage = e.target.files[0];
+      if (newSelectedImage) {
+        setSelectedImage(newSelectedImage);
+        setRotateAddImage(true);
+        console.log('Выбрано изображение:', newSelectedImage);
+      } else {
+        setSelectedImage(null);
+        setRotateAddImage(false);
+      }
+  };    
+  
+  
+  const handleMessage = (e) => {
+    setMessage(e.target.value);
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Предотвращаем перенос строки в инпуте
+      handleSubmit();
+    }
+  };
+
+  const handleSubmit = () => {
+    if (message.trim() === '' && selectedImage===null) {
+      setAnimateBorder(true); // Устанавливаем состояние анимации
+      setTimeout(() => {
+        setAnimateBorder(false); // Сбрасываем состояние анимации через секунду
+      }, 1000);
+    } else {
+      console.log(selectedImage, message);
+      setSelectedImage(null)
+      setRotateAddImage(false);
+      setMessage('');
+    }
+  }
   const reversedMessages = props.messages.getMessages ? props.messages.getMessages.slice().sort((a, b) => {
     return new Date(a.createdAt) - new Date(b.createdAt);
   })
@@ -35,7 +80,9 @@ const Dialog = (props) => {
       <div ref={messagesContainerRef} className={styles.main__content}>
         {
           Array.isArray(props.messages) ?
-          <></>
+          <div className={styles.main__content_nothing}>
+          Диалог не выбран.
+          </div>
           :
           <>
           {reversedMessages.map(function(el,i){
@@ -65,7 +112,26 @@ const Dialog = (props) => {
         }
       </div>
       <div className={styles.main__head}>
-        <input type="text" className={styles.main__head_input} placeholder='Введите сообщение...'/>
+        {
+          props.dialog?
+          <>
+<label htmlFor="imageInput" className={`${styles.imageInputWrapper} ${rotateAddImage ? styles.rotateImage : ''}`}>
+  <img src={Add} className={`${styles.main__head_add} ${selectedImage ? styles.selectedImage : ''}`} alt="Add Image" />
+  <input
+    type="file"
+    id="imageInput"
+    className={styles.hiddenInput}
+    onChange={handleImageUpload}
+  />
+</label>
+          <input type="text" value={message} onKeyDown={handleKeyDown} onChange={e=>handleMessage(e)}  className={`${styles.main__head_input} ${animateBorder ? styles.animate_border : ''}`} placeholder='Введите сообщение...'/>
+          
+          <img src={Send} onClick={handleSubmit} className={styles.main__head_send} alt="" />
+          
+          </>
+          :
+          <></>
+        }
       </div>
     </div>
   )

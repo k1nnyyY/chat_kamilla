@@ -16,12 +16,25 @@ const Message = (props) => {
       <img src={`https://storage.yandexcloud.net/${data.companion.avatar.path}`} className={styles.main__avatar} alt="" />
       <div className={styles.main__text}>
         <h5>{data.companion.firstname+' '+data.companion.lastname}</h5>
-        <h6 className={styles.main__text_message}>{
+        <h6 className={styles.main__text_message}>
+        {
+          data.message.ownerId ===1?
+          <h6 className={styles.main__text_message_who}>
+            {'Я:'}&nbsp;
+          </h6>
+          :
+          <h6 className={styles.main__text_message_who}>
+            {data.message.owner.firstname+':'}&nbsp;
+          </h6>
+        }
+
+        {
         data.message.image?
         'Изображение'
         :
         data.message.message
-        }</h6>
+        }
+        </h6>
       </div>
       <p className={styles.main__date}>{formattedTime}</p>
     </div>

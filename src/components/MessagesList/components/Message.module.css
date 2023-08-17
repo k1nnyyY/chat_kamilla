@@ -67,6 +67,12 @@ h6 {
 
 .main__text_message {
     white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+}
+
+.main__text_message_who {
+    font-size: 14px;
+    font-weight: 200;
 }
