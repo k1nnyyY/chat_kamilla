@@ -17,11 +17,7 @@ const ChatPage = (props) => {
       dialog: selectedDialogToken?.token || "", // Проверка наличия токена
     },
     skip: !selectedDialogToken, // Пропуск запроса, если нет токена
-    context: {
-      role: 'dialogs' // Указание роли для выбора соответствующего микросервиса
-    }
 });
-
 
   useEffect(() => {
     if (!loadingMessages && !errorMessages && selectedDialogToken !== null) {

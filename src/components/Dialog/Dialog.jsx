@@ -39,7 +39,7 @@ const Dialog = (props) => {
           :
           <>
           {reversedMessages.map(function(el,i){
-            if(el.message===null){
+            if(el.message===null && el.image===null){
               return(<></>)
             }
             const inputDateString = el.createdAt;
@@ -49,14 +49,14 @@ const Dialog = (props) => {
             const minutes = date.getUTCMinutes();
             console.log(props.messages)
             const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-          
+            
             if(el.ownerId===1){
               return(
-                <MessageSend key={i} text={el.message} time={formattedTime}/>
+                <MessageSend key={i} image={el.image} text={el.message} time={formattedTime}/>
               )
             }
             return(
-              <MessageGet key={i} text={el.message} time={formattedTime}/>
+              <MessageGet key={i} image={el.image}text={el.message} time={formattedTime}/>
             )
           })
 

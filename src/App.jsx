@@ -4,7 +4,8 @@ import { USER_PREVIEW_QUERY, GET_MY_DIALOGS_QUERY, GET_CHAT_ROOMS_QUERY,GET_MESS
 import ChatPage from "./pages/chatPage";
 function App() {
 
-  const { loading: loadingDialogs, error: errorDialogs, data: dataDialogs } = useQuery(GET_MY_DIALOGS_QUERY);
+  const { loading: loadingDialogs, error: errorDialogs, data: dataDialogs } = useQuery(GET_MY_DIALOGS_QUERY,
+);
   const { loading: loadingChatRooms, error: errorChatRooms, data: dataChatRooms } = useQuery(GET_CHAT_ROOMS_QUERY);
 
   if (loadingDialogs || loadingChatRooms ) return <p>Loading...</p>;

@@ -34,8 +34,22 @@
     font-weight: 400;
 }
 
+.main__message_date_image {
+    min-height: 100%;
+    display: flex;
+    font-size: 12px;
+    justify-content: end;
+    font-weight: 400;
+    text-align: right;
+}
+
 .main__message_text {
-    max-width: 90%;
+    max-width: 100%;
     height: max-content;
     margin: 0 .5vh;
+}
+
+.image {
+    max-width: 20vw;
+    border-radius: 2vh;
 }
