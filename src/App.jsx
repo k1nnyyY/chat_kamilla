@@ -1,19 +1,20 @@
 // App.jsx
 import { useQuery } from "@apollo/client";
-import { USER_PREVIEW_QUERY, GET_MY_DIALOGS_QUERY, GET_CHAT_ROOMS_QUERY } from "./query/queries";
+import { USER_PREVIEW_QUERY, GET_MY_DIALOGS_QUERY, GET_CHAT_ROOMS_QUERY,GET_MESSAGES_QUERY } from "./query/queries";
 import ChatPage from "./pages/chatPage";
-import Logo from "./assets/logo.png";
 function App() {
 
-  const { loading, error, data } = useQuery(GET_CHAT_ROOMS_QUERY);
+  const { loading: loadingDialogs, error: errorDialogs, data: dataDialogs } = useQuery(GET_MY_DIALOGS_QUERY);
+  const { loading: loadingChatRooms, error: errorChatRooms, data: dataChatRooms } = useQuery(GET_CHAT_ROOMS_QUERY);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  if (loadingDialogs || loadingChatRooms ) return <p>Loading...</p>;
+  if (errorDialogs) return <p>Error: {errorDialogs.message}</p>;
+  if (errorChatRooms) return <p>Error: {errorChatRooms.message}</p>;
 
-  const dialogs = data.getChatRooms;
+  const dialogs = dataDialogs.getMyDialogs;
+  const chatRooms = dataChatRooms.getChatRooms;
 
-  console.log(dialogs)
-  // const { loading, error, data } = useQuery(USER_PREVIEW_QUERY, {
+  console.log(dialogs, chatRooms);  // const { loading, error, data } = useQuery(USER_PREVIEW_QUERY, {
   //   variables: { asVIP: false },
   // });
   // if (loading) return <p>Loading...</p>;
@@ -26,7 +27,7 @@ function App() {
 
   return (
     <>
-      <ChatPage />
+      <ChatPage dialogs={dialogs}/>
       {/* <div>
         <img src={user.avatar.path} alt="User Avatar" />
       </div>

@@ -47,3 +47,39 @@
     max-height: 64vh;
     overflow: scroll;
 }
+
+.main__head_input {
+    border: 1px solid #2B3137;
+    background-color: #1C1C1C;
+    width: 100%;
+    height: 2vh;
+    border-radius: 6vh;
+    padding: 2vh 3vh;
+    font-size: 14px;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;
+
+}
+
+.main__head_input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: #31373F;
+    opacity: 1; /* Firefox */
+}
+
+.main__head_input:focus {
+    outline: none;
+}
+
+input {
+    padding: 0;
+}
+  
+input[type="text"] {
+    appearance: textfield;
+    -webkit-appearance: textfield;
+}
+  
+input[type="text"]::-webkit-search-decoration {
+      -webkit-appearance: none;
+}

@@ -2,13 +2,11 @@ import { ApolloClient, InMemoryCache, HttpLink, ApolloLink } from '@apollo/clien
 
 // Middleware для добавления заголовка авторизации
 const authLink = new ApolloLink((operation, forward) => {
-  // Используйте заголовок авторизации с вашим токеном
   operation.setContext({
     headers: {
-      Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjkwNTQwMzA2LCJleHAiOjE2OTgzMTYzMDZ9.mTTzRDlPwrYXMzBxM-NHbA4uJP3TBHfxscB_D4ZzW3g`
+      Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjkwNTQwMzA2LCJleHAiOjE2OTgzMTYzMDZ9.mTTzRDlPwrYXMzBxM-NHbA4uJP3TBHfxscB_D4ZzW3g"
     }
   });
-
   return forward(operation);
 });
 
@@ -26,20 +24,15 @@ const dialogsLink = new HttpLink({
 
 // Объединение всех ссылок
 const link = ApolloLink.split(
-  // Выбираем ссылку на основе операции GraphQL
-  (operation) => {
-    const operationName = operation.operationName;
-
-    if (operationName === 'storageOperation') {
-      return storageLink;
-    } else if (operationName === 'dialogsOperation') {
-      return dialogsLink;
-    } else {
-      return httpLink;
-    }
-  },
-  authLink.concat(httpLink), // Используем httpLink по умолчанию для остальных операций
+  operation => operation.operationName === 'storageOperation',
+  authLink.concat(storageLink),
+  ApolloLink.split(
+    operation => operation.operationName === 'dialogsOperation',
+    authLink.concat(dialogsLink),
+    authLink.concat(httpLink)
+  )
 );
+
 
 const client = new ApolloClient({
   link: link,

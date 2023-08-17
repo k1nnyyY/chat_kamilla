@@ -1,6 +1,32 @@
 // queries.js
 import gql from 'graphql-tag';
 
+export const RENDEZVOUS_FRAGMENT = gql`
+  fragment rendezvousFr on Rendezvous {
+    createdAt
+    id
+    inviteeId
+    inviterId
+    movieId
+    room
+    type
+  }
+`;
+
+export const CALL_FRAGMENT = gql`
+  fragment callFr on Call {
+    calleeId
+    callerId
+    createdAt
+    duration
+    finishedAt
+    id
+    sessionId
+    startedAt
+    type
+  }
+`;
+
 export const USER_PREVIEW_QUERY = gql`
   query UserPreview($asVIP: Boolean!) {
     userPreview(asVIP: $asVIP) {
@@ -96,55 +122,6 @@ export const USER_GIFT_FRAGMENT = gql`
   }
 `;
 
-export const DIALOG_FRAGMENT = gql`
-  fragment dialogFr on Dialog {
-    _companion
-    companion {
-      id
-      firstname
-      lastname
-      lastTimeDialogOnline
-      avatar {
-        ...imageFr
-      }
-    }
-    createdAt
-    isBlocked
-    lastMessage
-    message {
-      ...messageFr
-    }
-    rendezvousId
-    token
-    users
-  }
-`;
-
-export const RENDEZVOUS_FRAGMENT = gql`
-  fragment rendezvousFr on Rendezvous {
-    createdAt
-    id
-    inviteeId
-    inviterId
-    movieId
-    room
-    type
-  }
-`;
-
-export const CALL_FRAGMENT = gql`
-  fragment callFr on Call {
-    calleeId
-    callerId
-    createdAt
-    duration
-    finishedAt
-    id
-    sessionId
-    startedAt
-    type
-  }
-`;
 
 export const MESSAGE_FRAGMENT = gql`
   fragment messageFr on Message {
@@ -196,7 +173,39 @@ export const MESSAGE_FRAGMENT = gql`
     }
     userGiftId
   }
+  ${CALL_FRAGMENT}
+  ${RENDEZVOUS_FRAGMENT}
+  ${IMAGE_FRAGMENT}
 `;
+
+
+
+export const DIALOG_FRAGMENT = gql`
+  fragment dialogFr on Dialog {
+    _companion
+    companion {
+      id
+      firstname
+      lastname
+      lastTimeDialogOnline
+      avatar {
+        ...imageFr
+      }
+    }
+    createdAt
+    isBlocked
+    lastMessage
+    message {
+      ...messageFr
+    }
+    rendezvousId
+    token
+    users
+  }
+  ${MESSAGE_FRAGMENT}
+  ${IMAGE_FRAGMENT}
+`;
+
 
 export const DELETE_DIALOG_MUTATION = gql`
   mutation DeleteDialog($dialogToken: String!) {
@@ -268,6 +277,7 @@ export const GET_MESSAGES_QUERY = gql`
       ...messageFr
     }
   }
+  ${MESSAGE_FRAGMENT}
 `;
 
 export const GET_MY_DIALOGS_QUERY = gql`
@@ -276,6 +286,7 @@ export const GET_MY_DIALOGS_QUERY = gql`
       ...dialogFr
     }
   }
+  ${DIALOG_FRAGMENT}
 `;
 
 export const GET_USER_GIFT_QUERY = gql`

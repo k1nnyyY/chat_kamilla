@@ -62,3 +62,9 @@ h6 {
     font-weight: 400;
     color: #7F8FA6;
 }
+
+.main__text_message {
+    white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}

@@ -2,16 +2,29 @@ import React, { useState } from 'react'
 import styles from './Message.module.css';
 import Avatar from '../images/avatar_h.jpg';
 const Message = (props) => {
-  console.log(props)
+  const data = props.info;
+  const inputDateString = data.message.createdAt;
+  const date = new Date(inputDateString);
+
+  const hours = date.getUTCHours();
+  const minutes = date.getUTCMinutes();
+  console.log(date)
+  const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
   return (
     
     <div className={props.status===0?styles.main:styles.main_active}>
-      <img src={Avatar} className={styles.main__avatar} alt="" />
+      <img src={`https://storage.yandexcloud.net/${data.companion.avatar.path}`} className={styles.main__avatar} alt="" />
       <div className={styles.main__text}>
-        <h5>Иван Иванов</h5>
-        <h6>Привет! Не отвлекаю?</h6>
+        <h5>{data.companion.firstname+' '+data.companion.lastname}</h5>
+        <h6 className={styles.main__text_message}>{
+        data.message.image?
+        'Изображение'
+        :
+        data.message.message
+        }</h6>
       </div>
-      <p className={styles.main__date}>00:23</p>
+      <p className={styles.main__date}>{formattedTime}</p>
     </div>
   )
 }

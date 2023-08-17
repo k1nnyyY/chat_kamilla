@@ -2,33 +2,13 @@ import React, { useState } from 'react'
 import styles from './MessageList.module.css';
 import Message from './components/Message';
 import Logo from '../../assets/logo.png';
-const MessageList = () => {
+const MessageList = (props) => {
   const [selectedDialog, setSelectedDialog] = useState(null)
-  const [dialogs, setDialogs] = useState([
-    {
-      name: 'Andrew',
-    },
-    {
-      name: 'Alex',
-    },
-    {
-      name: 'Stephan',
-    },
-    {
-      name: 'Stephan',
-    },
-    {
-      name: 'Stephan',
-    },
-    {
-      name: 'Stephan',
-    },
-
-  ]);
+  const [dialogs, setDialogs] = useState(props.dialogs);
 
   const handleSelector = (i) => {
     setSelectedDialog(i)
-    console.log(i, selectedDialog)
+    props.setToken(props.dialogs[i])
   }
   
   return (
@@ -47,7 +27,7 @@ const MessageList = () => {
                     1
                     :
                     0
-                  } key={idx}/>
+                  } info={dialogs[idx]} key={idx}/>
                 </div>
               )
             })
