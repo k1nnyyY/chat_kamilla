@@ -9,11 +9,16 @@ const ChatPage = (props) => {
   const [selectedDialogToken, setSelectedDialogToken] = useState(null);
   const [messages, setMessages] = useState([]);
 
+  const [newMessage, setNewMessage] = useState([]);
+
   const { loading: loadingMessages, error: errorMessages, data: dataMessages } = useQuery(GET_MESSAGES_QUERY, {
     variables: {
       page: 1,
       size: 30,
       dialog: selectedDialogToken?.token || "", // Проверка наличия токена
+    },
+    context: {
+      clientName: 'default'
     },
     skip: !selectedDialogToken, // Пропуск запроса, если нет токена
 });
@@ -28,8 +33,8 @@ const ChatPage = (props) => {
 
   return (
     <div className={styles.main}>
-      <MessageList dialogs={props.dialogs} setToken={setSelectedDialogToken}/>
-      <Dialog dialog={selectedDialogToken} messages={messages}/>
+      <MessageList user={props.user} newMessage={newMessage} dialogs={props.dialogs} setToken={setSelectedDialogToken}/>
+      <Dialog dialog={selectedDialogToken} messages={messages} newMessage={newMessage}/>
     </div>
   )
 }

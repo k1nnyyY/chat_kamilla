@@ -350,3 +350,57 @@ export const CHAT_ROOM_SUBSCRIPTION = gql`
     }
   }
 `;
+
+
+export const UPLOAD_IMAGE_MUTATION = gql`
+  mutation UploadImage($input: SaveImageInput!) {
+    uploadImage(input: $input) {
+      eventId
+      id
+      path
+      sequence
+      status
+    }
+  }
+`;
+
+export const COMMENT_EVENT_MUTATION = gql`
+  mutation CommentEvent($input: CommentEventInput!) {
+    commentEvent(input: $input)
+  }
+`;
+
+export const UPLOAD_AVATAR_MUTATION = gql`
+  mutation UploadAvatar($input: SaveImageInput!) {
+    uploadAvatar(input: $input) {
+      eventId
+      id
+      path
+      status
+    }
+  }
+`;
+
+export const CHANGE_IMAGE_ORDER_MUTATION = gql`
+  mutation ChangeImageOrder($input: ChangeImageOrderInput!) {
+    changeImageOrder(input: $input)
+  }
+`;
+
+export const REMOVE_IMAGE_MUTATION = gql`
+  mutation RemoveImage($id: Int!) {
+    removeImage(id: $id)
+  }
+`;
+
+export const SEND_IMAGE_MUTATION = gql`
+  mutation SendImage($input: SendImageInput!) {
+    sendImage(input: $input) {
+      eventId
+      id
+      path
+      sequence
+      status
+    }
+  }
+`;

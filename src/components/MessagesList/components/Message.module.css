@@ -65,6 +65,7 @@ h6 {
     color: #7F8FA6;
     width: max-content;
     text-align: right;
+    margin: 0;
 }
 
 .main__text_message {
@@ -77,4 +78,13 @@ h6 {
 .main__text_message_who {
     font-size: 14px;
     font-weight: 200;
+}
+
+.status{
+    height: 1vh;
+    margin: 0 35%;
+}
+
+.info {
+    max-height: min-content;
 }

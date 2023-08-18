@@ -22,7 +22,7 @@ const MessageList = (props) => {
             dialogs.map(function(d, idx){
               return (
                 <div className={styles.main__dialogs_link} onClick={()=>{handleSelector(idx)}}>
-                  <Message status={
+                  <Message user={props.user} newMessage={props.newMessage} status={
                     selectedDialog===idx?
                     1
                     :

@@ -1,6 +1,9 @@
 import React, {useState} from 'react';
 import styles from './MessageSend.module.css';
 
+import readM from '../../../assets/readM.png';
+import sendM from '../../../assets/sendM.png';
+
 const MessageSend = (props) => {
   const [isImageFullscreen, setIsImageFullscreen] = useState(false); // Состояние для увеличенного изображения
 
@@ -31,6 +34,16 @@ const MessageSend = (props) => {
               props.image===null?
               <div className={styles.main__message_date}>
                 {props.time}
+                {
+                  props.element.isRead?
+                  <>
+                    <img src={readM} className={styles.status} alt="" />
+                  </>
+                  :
+                  <>
+                    <img src={sendM} className={styles.status} alt="" />
+                  </>
+                }
               </div> 
                 :
                 <></>

@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { format, isToday, parseISO } from 'date-fns';
 import styles from './Message.module.css';
+
+import getM from '../../../assets/getM.png';
+import sendM from '../../../assets/sendM.png';
+import readM from '../../../assets/readM.png';
+
+
 const Message = (props) => {
   const data = props.info;
   const inputDateString = data.message.createdAt;
@@ -9,7 +15,7 @@ const Message = (props) => {
   // Проверяем, сегодняшняя ли это дата
   const isTodayDate = isToday(date);
   console.log(inputDateString)
-
+  console.log(props.newMessage.token,props.info.token,props.newMessage.message)
   // Форматируем дату в зависимости от того, сегодняшняя она или нет
   const formattedTime = isTodayDate
     ? format(date, 'HH:mm') // Сегодня - часы и минуты
@@ -33,14 +39,35 @@ const Message = (props) => {
         }
 
         {
-        data.message.image?
+        data.message.image && props.newMessage[0]===undefined?
         'Изображение'
+        :
+        props.newMessage[0]===undefined?
+        data.message.message
+        :
+        props.newMessage.token===props.info.token?
+        props.newMessage.message
         :
         data.message.message
         }
         </h6>
       </div>
+      <div className={styles.info}>
+
+      {
+        props.user.id===data.message.ownerId?
+        !data.message.isRead?
+        <img src={sendM} className={styles.status} alt="" />
+        :
+        <img src={readM} className={styles.status} alt="" />
+        :
+        !data.message.isRead?
+        <img src={getM} className={styles.status} alt="" />
+        :
+        <></>
+      }
       <p className={styles.main__date}>{formattedTime}</p>
+      </div>
     </div>
   )
 }

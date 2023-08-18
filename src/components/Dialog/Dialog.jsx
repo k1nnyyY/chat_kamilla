@@ -4,7 +4,7 @@ import CusDate from './components/Date';
 import MessageSend from './components/MessageSend';
 import MessageGet from './components/MessageGet';
 import { useMutation } from '@apollo/client';
-import { SEND_MESSAGE_MUTATION } from '../../query/queries.js';
+import { SEND_MESSAGE_MUTATION, SEND_IMAGE_MUTATION, UPLOAD_IMAGE_MUTATION } from '../../query/queries.js';
 import { format } from 'date-fns';
 
 import Add from '../../assets/Add.png'
@@ -16,6 +16,8 @@ const Dialog = (props) => {
   const [selectedImage, setSelectedImage] = useState(null); // Новое состояние
   const [rotateAddImage, setRotateAddImage] = useState(false);
   const [selectedImagePreview, setSelectedImagePreview] = useState(null);
+
+  const [localMess, setLocalMess] = useState([]);
 
 
   let currentDate = '';
@@ -65,6 +67,7 @@ const Dialog = (props) => {
     } else {
       console.log(props.dialog)
       try {
+        if(message.trim() !== ''){
         const response = await sendMessageMutation({
           variables: {
             input: {
@@ -73,17 +76,54 @@ const Dialog = (props) => {
               dialogToken: props.dialog.token,
             },
           },
+          context: {
+            clientName: 'default'
+          }      
         });
+        console.log('Message sent:', response.data.sendMessage);
+
+      }
+        if(selectedImage){
+          console.log('ВОТ ОН', selectedImage)
+          const response = await sendImageMutation({
+            variables: {
+              input: {
+                file: selectedImage,
+                companion: props.dialog.companion.id,
+                dialogToken: props.dialog.token,
+              },
+            },
+            context: {
+              clientName: 'storage'
+            }
+          })
+          console.log('Image sent:', response.data.sendMessage);
+        }
         // Do something with the response if needed
 
-        // console.log('Message sent:', response.data.sendMessage);
-        reversedMessages.push(reversedMessages[0]);
-        console.log('HEEEEE',reversedMessages)
+        const date = Date.now();
+            
+        const formattedTime = format(date, 'HH:mm');
+        props.newMessage.push({
+          message: message,
+          createdAt: formattedTime,
+          image: null,
+          type: 'send',
+          token: props.dialog.token,
+        });
+        localMess.push({
+          message: message,
+          createdAt: formattedTime,
+          image: null,
+          type: 'send',
+          token: props.dialog.token,
+        });
+        console.log('HEEEEE',localMess)
       } catch (error) {
         // Handle errors if needed
         console.error('Error sending message:', error);
       }
-      console.log(selectedImage, message);
+      console.log(selectedImage.file, message);
       setSelectedImage(null)
       setRotateAddImage(false);
       setSelectedImagePreview(null)
@@ -104,7 +144,7 @@ const Dialog = (props) => {
     }
   }, [reversedMessages]);
   const [sendMessageMutation] = useMutation(SEND_MESSAGE_MUTATION);
-
+  const [sendImageMutation] = useMutation(SEND_IMAGE_MUTATION);
   return (
     <div className={styles.main}>
       <div className={styles.main__head_top}>
@@ -146,11 +186,11 @@ const Dialog = (props) => {
                   formattedDate!==currentDate?
                   <>
                   <CusDate date={el.createdAt}/>
-                  <MessageSend key={i} image={el.image} text={el.message} time={formattedTime}/>
+                  <MessageSend element={el} key={i} image={el.image} text={el.message} time={formattedTime}/>
                   </>
                   :
                   <>
-                  <MessageSend key={i} image={el.image} text={el.message} time={formattedTime}/>
+                  <MessageSend element={el} key={i} image={el.image} text={el.message} time={formattedTime}/>
                   </>
                 
               )
@@ -169,6 +209,26 @@ const Dialog = (props) => {
           })
 
           }
+
+
+          {
+            localMess ?
+            <>
+              {
+                localMess.map((el,i)=>{
+                  if(el.token===props.dialog.token){
+                    return (
+                      <MessageSend key={i} element={el} image={el.image} text={el.message} time={el.createdAt}/>
+                      )
+
+                  }
+                })
+              }
+            </>
+            :
+            <></>
+          }
+
           </>
         }
       </div>

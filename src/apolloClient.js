@@ -9,35 +9,54 @@ const authLink = new ApolloLink((operation, forward) => {
   });
   return forward(operation);
 });
-
-const httpLink = new HttpLink({
-  uri: 'https://korpustage.ru/dialogs'
-});
-
 const storageLink = new HttpLink({
   uri: 'https://korpustage.ru/storage'
 });
 
-const dialogsLink = new HttpLink({
+const httpLink = new HttpLink({
+  uri: 'https://korpustage.ru/dialogs',
+  
+});
+
+
+const searchLink = new HttpLink({
   uri: 'https://korpustage.ru/search'
 });
 
-// Объединение всех ссылок
-const link = ApolloLink.split(
-  operation => operation.getContext().role === 'storage',
-  authLink.concat(storageLink),
-  ApolloLink.split(
-    operation => operation.getContext().role === 'dialogs',
-    authLink.concat(dialogsLink),
-    authLink.concat(httpLink)  // По умолчанию для 'search'
-  )
-);
-
-
-
 const client = new ApolloClient({
-  link: link,
+  link:
+      ApolloLink.split(
+          operation => operation.getContext().clientName === 'search',
+          authLink.concat(searchLink), // if above 
+          ApolloLink.split(
+              operation => operation.getContext().clientName === 'storage',
+              authLink.concat(storageLink),
+              authLink.concat(httpLink)
+          )
+      ),
   cache: new InMemoryCache()
 });
+// // Объединение всех ссылок с выбором на основе имени клиента
+// const link = ApolloLink.split(
+//   operation => {
+//     const clientName = operation.getContext().clientName;
+//     switch (clientName) {
+//       case 'storage':
+//         return storageLink;
+//       case 'search':
+//         return searchLink;
+//       default:
+//         return httpLink;
+//     }
+//   },
+//   authLink.concat(
+//     httpLink
+//   )
+// );
+
+// const client = new ApolloClient({
+//   link: link,
+//   cache: new InMemoryCache()
+// });
 
 export default client;
