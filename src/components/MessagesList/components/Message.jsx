@@ -11,11 +11,11 @@ const Message = (props) => {
   const data = props.info;
   const inputDateString = data.message.createdAt;
   const date = parseISO(inputDateString); // Преобразуем строку в объект Date
-  console.log(inputDateString)
+  // console.log(inputDateString)
   // Проверяем, сегодняшняя ли это дата
   const isTodayDate = isToday(date);
-  console.log(inputDateString)
-  console.log(props.newMessage.token,props.info.token,props.newMessage.message)
+  // console.log(inputDateString)
+  // console.log(props.newMessage.token,props.info.token,props.newMessage.message)
   // Форматируем дату в зависимости от того, сегодняшняя она или нет
   const formattedTime = isTodayDate
     ? format(date, 'HH:mm') // Сегодня - часы и минуты

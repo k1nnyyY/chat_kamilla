@@ -34,7 +34,7 @@ const ChatPage = (props) => {
   return (
     <div className={styles.main}>
       <MessageList user={props.user} newMessage={newMessage} dialogs={props.dialogs} setToken={setSelectedDialogToken}/>
-      <Dialog dialog={selectedDialogToken} messages={messages} newMessage={newMessage}/>
+      <Dialog dialog={selectedDialogToken} messages={messages?messages:''} newMessage={newMessage}/>
     </div>
   )
 }

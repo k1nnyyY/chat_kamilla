@@ -262,6 +262,7 @@ export const GET_DIALOG_BY_COMPANION_QUERY = gql`
       ...dialogFr
     }
   }
+  ${DIALOG_FRAGMENT}
 `;
 
 export const GET_GIFTS_QUERY = gql`
@@ -333,6 +334,7 @@ export const RECEIVE_MESSAGE_SUBSCRIPTION = gql`
       ...messageFr
     }
   }
+  ${MESSAGE_FRAGMENT}
 `;
 
 export const RENDEZVOUS_PROCESS_SUBSCRIPTION = gql`
@@ -402,5 +404,17 @@ export const SEND_IMAGE_MUTATION = gql`
       sequence
       status
     }
+  }
+`;
+
+const SEND_IMAGE_INPUT = gql`
+  input SendImageInput {
+    file: Upload!
+    message: String
+    """Companion id"""
+    companion: Int
+    dialogToken: String
+    chatRoomId: Int
+    inReply: Int
   }
 `;
