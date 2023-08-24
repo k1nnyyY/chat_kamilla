@@ -41,8 +41,8 @@ const Dialog = (props) => {
       query: RECEIVE_MESSAGE_SUBSCRIPTION,
     }).subscribe({
       next(res){
-        const updatedMessages = [...newMessage, res.data.receiveMessage];
-        setNewMessage(updatedMessages);
+        // const updatedMessages = [...newMessage, res.data.receiveMessage];
+        setNewMessage(prevMessages => [...prevMessages, res.data.receiveMessage]);
         console.log('RECEIVE_MESSAGE_SUBSCRIPTION Response: ', res.data.receiveMessage)
       },
       error(error){
