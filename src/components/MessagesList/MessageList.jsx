@@ -1,50 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import styles from './MessageList.module.css';
 import Message from './components/Message';
 import Logo from '../../assets/logo.png';
-import { GET_DIALOG_BY_COMPANION_QUERY } from '../../query/queries.js';
-import { useQuery } from "@apollo/client";
+import { GET_DIALOG_BY_COMPANION_QUERY, GET_MY_DIALOGS_QUERY } from '../../query/queries.js';
+import { ServiceContext } from './../../apolloClient.jsx';
 
 const MessageList = (props) => {
+  const { client } = useContext(ServiceContext);
+
   const [selectedDialog, setSelectedDialog] = useState(null);
+  const [searchValue, setSearchValue] = useState('');
   const [dialogs, setDialogs] = useState(props.dialogs);
   const [search, setSearch] = useState('');
-  const [searchValue, setSearchValue] = useState('');
+  useEffect(()=>{
 
-  const { loading: loadingSearch, error: errorSearch, data: dataSearch } = useQuery(GET_DIALOG_BY_COMPANION_QUERY, {
-    variables: {
-      companion: +searchValue,
-    },
-    context: {
-      clientName: 'default'
-    },
-    skip: !searchValue,
-  });
-
-  useEffect(() => {
-    if (!loadingSearch && !errorSearch && dataSearch !== undefined) {
-      console.log(dataSearch);
-
-      props.setToken(dataSearch.getDialogByCompanion);
-      
+    if(searchValue){
+      client.query({
+        query: GET_DIALOG_BY_COMPANION_QUERY,
+        variables: {
+            companion: +searchValue,
+        },
+        skip: !searchValue,
+      }).then(response => {
+        // props.setDialogs([response.data.getDialogByCompanion])
+        props.setToken(response.data.getDialogByCompanion);
+      }).catch(error => {
+        console.log(error);
+      });
+  
     }
-    console.log(loadingSearch, errorSearch)
-  }, [loadingSearch, errorSearch, dataSearch, searchValue]);
+    
+    setDialogs(props.dialogs)
+  },[props.dialogs, searchValue])
 
   const handleSelector = (i) => {
     setSelectedDialog(i);
     props.setToken(props.dialogs[i]);
+    console.log(props.dialogs[i]);
   };
 
   const handleSearch = (e) => {
     setSearch(e.target.value);
+
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       console.log(search)
-      setSearchValue(search); // Устанавливаем значение для запроса
+      setSearchValue(search);
     }
   };
 
@@ -56,9 +60,10 @@ const MessageList = (props) => {
         <div className={styles.main__dialogs}>
           {dialogs ? dialogs.map((d, idx) => (
             <div className={styles.main__dialogs_link} onClick={() => handleSelector(idx)} key={idx}>
-              <Message user={props.user} newMessage={props.newMessage} status={selectedDialog === idx ? 1 : 0} info={dialogs[idx]} />
+              <Message user={props.user} newMessage={props.newMessage} status={selectedDialog === idx ? 1 : 0} readStatus={props.readStatus?.filter((el)=>{return el.dialog===dialogs[idx]?.token})} info={dialogs[idx]} />
             </div>
-          )) : <></>}
+          )) : 
+          <></>}
         </div>
       </div>
     </div>

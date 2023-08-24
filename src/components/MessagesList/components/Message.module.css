@@ -59,6 +59,11 @@ h6 {
     margin-left: 10px;
 }
 
+.main__text_name {
+    font-size: 100%;
+    
+}
+
 .main__date {
     font-size: 12px;
     font-weight: 400;

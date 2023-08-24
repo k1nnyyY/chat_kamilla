@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useContext } from 'react'
 import styles from './Dialog.module.css';
 import CusDate from './components/Date';
 import MessageSend from './components/MessageSend';
 import MessageGet from './components/MessageGet';
-import { useMutation, useSubscription } from '@apollo/client';
-import { Mutation } from 'react-apollo';
-import { SEND_MESSAGE_MUTATION, SEND_IMAGE_MUTATION, RECEIVE_MESSAGE_SUBSCRIPTION } from '../../query/queries.js';
+import { SEND_MESSAGE_MUTATION, GET_MY_DIALOGS_QUERY, RECEIVE_MESSAGE_SUBSCRIPTION } from '../../query/queries.js';
 import { format } from 'date-fns';
+import { ServiceContext } from './../../apolloClient.jsx';
 
 import Add from '../../assets/Add.png'
 import Send from '../../assets/Send.png';
 
 const Dialog = (props) => {
+  const { client, webSocketClient } = useContext(ServiceContext);
+
   const [message, setMessage] = useState('');
   const [animateBorder, setAnimateBorder] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null); // Новое состояние
@@ -19,20 +20,9 @@ const Dialog = (props) => {
   const [selectedImagePreview, setSelectedImagePreview] = useState(null);
   const [showMessages, setShowMessages] = useState(true);
   const [localMess, setLocalMess] = useState([]);
-  
-  // const { data, loading, error } = useSubscription(RECEIVE_MESSAGE_SUBSCRIPTION, {
-  // });
-  //   if (loading) {
-  //   return <p>Loading...</p>;
-  // }
-  
-  // if(error){
-  //   return <p>Error {error.message}</p>
-  // }
-  
-  // if(data){
-  //   return <p>{data}</p>
-  // }
+  const messagesContainerRef = useRef();
+
+  const [newMessage, setNewMessage] = useState([]);
 
   let currentDate = '';
   let stepDate = '';
@@ -43,7 +33,38 @@ const Dialog = (props) => {
     } else {
       setShowMessages(true);
     }
+    console.log(props.dialog, showMessages, reversedMessages)
   }, [props.dialog]);
+
+  useEffect(()=>{
+    const subscription = webSocketClient.subscribe({
+      query: RECEIVE_MESSAGE_SUBSCRIPTION,
+    }).subscribe({
+      next(res){
+        const updatedMessages = [...newMessage, res.data.receiveMessage];
+        setNewMessage(updatedMessages);
+        console.log('RECEIVE_MESSAGE_SUBSCRIPTION Response: ', res.data.receiveMessage)
+      },
+      error(error){
+        console.error('RECEIVE_MESSAGE_SUBSCRIPTION Error: ', error)
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    }
+  }, [])
+
+  useEffect(()=>{
+    client.query({
+      query: GET_MY_DIALOGS_QUERY,
+    }).then(response => {
+      console.log('NEW',response.data.getMyDialogs[0]);
+      props.setDialogs(response.data.getMyDialogs);
+    }).catch(error => {
+      console.log(error);
+    });
+  }, [newMessage.length])
 
 
   const handleImageUpload = (e) => {
@@ -72,7 +93,7 @@ const Dialog = (props) => {
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      e.preventDefault(); // Предотвращаем перенос строки в инпуте
+      e.preventDefault();
       handleSubmit();
     }
   };
@@ -81,112 +102,110 @@ const Dialog = (props) => {
     if (message.trim() === '' && selectedImage===null) {
       if(animateBorder){
         return
-      }
-      setAnimateBorder(true); // Устанавливаем состояние анимации
-      setTimeout(() => {
-        setAnimateBorder(false); // Сбрасываем состояние анимации через секунду
-      }, 1000);
+      };
+      setAnimateBorder(true);
+      setTimeout(() => {setAnimateBorder(false)}, 1000);
     } else {
       console.log(props.dialog)
       try {
         if(message.trim() !== ''){
-        const response = await sendMessageMutation({
-          variables: {
-            input: {
-              message: message,
-              companion: props.dialog.companion.id,
-              dialogToken: props.dialog.token,
-            },
-          },
-          context: {
-            clientName: 'default'
-          }      
-        });
-        console.log('Message sent:', response.data.sendMessage);
-
-      }
-        if(selectedImage instanceof File){
-          const response = await sendImageMutation({
+          client.mutate({
+            mutation: SEND_MESSAGE_MUTATION,
             variables: {
-              input: {
-                file: selectedImage,
-              }
+                input: {
+                  message: message,
+                  companion: props.dialog.companion.id,
+                  dialogToken: props.dialog.token,
+                },
             },
-            context: {
-              clientName: 'storage'
-            }
-          })
-          console.log('Image sent:', response.data.sendMessage);
+          }).then(response => {
+            const updatedMessages = [...newMessage, response.data.sendMessage];
+            setNewMessage(updatedMessages);
+            console.log('Mutation response:', response.data.sendMessage);
+          }).catch(error => {
+            console.error('Mutation error:', error, nonReadedMessagesId, selectedDialogToken?.token);
+          });
+      // }
+      //   if(selectedImage instanceof File){
+      //     const response = await sendImageMutation({
+      //       variables: {
+      //         input: {
+      //           file: selectedImage,
+      //         }
+      //       },
+      //       context: {
+      //         clientName: 'storage'
+      //       }
+      //     })
+      //     console.log('Image sent:', response.data.sendMessage);
         }
-        // Do something with the response if needed
         setSelectedImage(null)
         setRotateAddImage(false);
         setSelectedImagePreview(null)
         setMessage('');
   
-        const date = Date.now();
-            
+        const date = Date.now();   
         const formattedTime = format(date, 'HH:mm');
+        // localMess.push({
+        //   message: message,
+        //   createdAt: formattedTime,
+        //   image: null,
+        //   type: 'send',
+        //   token: props.dialog.token,
+        //   ownerId: props.user.id
+        // });
         props.newMessage.push({
           message: message,
           createdAt: formattedTime,
           image: null,
           type: 'send',
           token: props.dialog.token,
+          ownerId: props.user.id
         });
-        localMess.push({
-          message: message,
-          createdAt: formattedTime,
-          image: null,
-          type: 'send',
-          token: props.dialog.token,
-        });
-        console.log('HEEEEE',localMess)
+        console.log('LocalMess: ',localMess)
       } catch (error) {
-        // Handle errors if needed
-
-        console.error('Error sending message:', error);
+        console.error('Dialog.jsx error sending message:', error);
       }
-      console.log(selectedImage.file, message);
       setSelectedImage(null)
       setRotateAddImage(false);
       setSelectedImagePreview(null)
       setMessage('');
     }
-  }
-  let reversedMessages = props.messages.getMessages ? props.messages.getMessages.slice().sort((a, b) => {
-    return new Date(a.createdAt) - new Date(b.createdAt);
-  })
-  : null;
+  };
 
-  const messagesContainerRef = useRef();
+  let reversedMessages = props.messages.getMessages ? props.messages.getMessages.slice().sort((a, b) => {return new Date(a.createdAt) - new Date(b.createdAt)}): null;
+
+  
   useEffect(() => {
     if (messagesContainerRef.current) {
       const { scrollHeight, clientHeight } = messagesContainerRef.current;
       messagesContainerRef.current.scrollTop = scrollHeight - clientHeight;
     }
   }, [reversedMessages]);
-  const [sendMessageMutation] = useMutation(SEND_MESSAGE_MUTATION);
-  const [sendImageMutation] = useMutation(SEND_IMAGE_MUTATION);
+
+  const handleNothing = () => {
+
+  };
+
   return (
     <div className={styles.main}>
       <div className={styles.main__head_top}>
         {
           props.dialog?
-          <>
-            <img src={`https://storage.yandexcloud.net/${props.dialog.companion.avatar.path}`} className={styles.main__head_avatar} alt="" />
-            <h4 className={styles.main__head_username}>{props.dialog.companion.firstname+' '+props.dialog.companion.lastname}</h4>
-          </>
+            <>
+              <img src={`https://storage.yandexcloud.net/${props.dialog.companion.avatar.path}`} className={styles.main__head_avatar} alt="" />
+              <h4 className={styles.main__head_username}>{props.dialog.companion.firstname+' '+props.dialog.companion.lastname}</h4>
+            </>
           :
-          <>
-          </>
+            <>
+            </>
         }
       </div>
       {
         !showMessages && (
           <div className={styles.main__content}>
             <div className={styles.main__content_nothing}>
-              Диалог не был найден.
+              Диалог не выбран.
             </div>
           </div>
         )
@@ -199,67 +218,117 @@ const Dialog = (props) => {
               Диалог не выбран.
             </div>
           :
-          <>
-          {reversedMessages?.map(function(el,i){
-            if(el.message===null && el.image===null){
+            <>
+            {reversedMessages?.map(function(el,i){
+              if(el.message===null && el.image===null){
+                return(
+                  <>
+                  </>
+                )
+              }
+              const inputDateString = el.createdAt;
+              const date = new Date(inputDateString);
+              const formattedTime = format(date, 'HH:mm');
+              const formattedDate = format(date, 'dd-MM-yyyy');
+              currentDate = stepDate;
+              if(formattedDate!==currentDate){
+                stepDate = formattedDate;
+              };
+              if(el.ownerId===1){
+                return(
+                    formattedDate!==currentDate?
+                    <>
+                      <CusDate key={i*200+12333} date={el.createdAt}/>
+                      <MessageSend  element={el} key={i*300+1239} image={el.image} text={el.message} time={formattedTime}/>
+                    </>
+                    :
+                    <>
+                      <MessageSend element={el} key={i+1} image={el.image} text={el.message} time={formattedTime}/>
+                    </>
+                  
+                )
+              }
               return(
+                formattedDate!==currentDate?
                 <>
+                  <CusDate key={i*100+56} date={el.createdAt}/>
+                  <MessageGet key={i*800} image={el.image} text={el.message} time={formattedTime}/>
+                </>
+                :
+                <>
+                  <MessageGet key={i*600+63} image={el.image} text={el.message} time={formattedTime}/>
                 </>
               )
-            }
-            const inputDateString = el.createdAt;
-            const date = new Date(inputDateString);
-            const formattedTime = format(date, 'HH:mm');
-            const formattedDate = format(date, 'dd-MM-yyyy');
-            currentDate = stepDate;
-            if(formattedDate!==currentDate){
-              stepDate = formattedDate;
-            };
-            if(el.ownerId===1){
-              return(
-                  formattedDate!==currentDate?
-                  <>
-                    <CusDate date={el.createdAt}/>
-                    <MessageSend element={el} key={i} image={el.image} text={el.message} time={formattedTime}/>
-                  </>
-                  :
-                  <>
-                    <MessageSend element={el} key={i} image={el.image} text={el.message} time={formattedTime}/>
-                  </>
-                
-              )
-            }
-            return(
-              formattedDate!==currentDate?
+            })
+          }
+            {
+              localMess ?
               <>
-                <CusDate date={el.createdAt}/>
-                <MessageGet key={i} image={el.image} text={el.message} time={formattedTime}/>
+                {
+                  localMess?.map((el,i)=>{
+                    if(el.token===props.dialog.token && el.ownerId===props.user.id){
+                      return (
+                        <MessageSend key={i*1000+189} element={el} image={el.image} text={el.message} time={el.createdAt}/>
+                        )
+                    } else if (el.ownerId===props.dialog.companion.id) {
+                      return (
+                        <></>
+                      )
+                    }
+                  })
+                }
               </>
               :
               <>
-                <MessageGet key={i} image={el.image} text={el.message} time={formattedTime}/>
               </>
-            )
-          })
-        }
-           {
-            localMess ?
-            <>
-              {
-                localMess?.map((el,i)=>{
-                  if(el.token===props.dialog.token){
-                    return (
-                      <MessageSend key={i} element={el} image={el.image} text={el.message} time={el.createdAt}/>
-                      )
-                  }
-                })
+            }
+            { // ! ------------------------
+
+            newMessage?.map(function(el,i){
+              if((el.message===null && el.image===null) || el.dialog!==props.dialog.token){
+                return(
+                  <>
+                  </>
+                )
               }
-            </>
-            :
-            <>
-            </>
+              const inputDateString = el.createdAt;
+              const date = new Date(inputDateString);
+              const formattedTime = format(date, 'HH:mm');
+              const formattedDate = format(date, 'dd-MM-yyyy');
+              currentDate = stepDate;
+              if(formattedDate!==currentDate){
+                stepDate = formattedDate;
+              };
+              if(el.ownerId===1){
+                return(
+                    formattedDate!==currentDate?
+                    <>
+                      <CusDate key={i*200+12333} date={el.createdAt}/>
+                      <MessageSend  element={el} key={i*300+1239} image={el.image} text={el.message} time={formattedTime}/>
+                    </>
+                    :
+                    <>
+                      <MessageSend element={el} key={i+1} image={el.image} text={el.message} time={formattedTime}/>
+                    </>
+                  
+                )
+              }
+              return(
+                formattedDate!==currentDate?
+                <>
+                  <CusDate key={i*100+56} date={el.createdAt}/>
+                  <MessageGet key={i*800} image={el.image} text={el.message} time={formattedTime}/>
+                </>
+                :
+                <>
+                  <MessageGet key={i*600+63} image={el.image} text={el.message} time={formattedTime}/>
+                </>
+              )
+            })
+            // ! --------------------------
           }
-          </>
+
+            </>        
         }
       </div> )}
       <div className={styles.main__head}>
@@ -270,17 +339,17 @@ const Dialog = (props) => {
       )}
         {
           selectedImage?  
-          <div className={styles.main__head_filename}>
-            {selectedImage.name}
-          </div>
+            <div className={styles.main__head_filename}>
+              {selectedImage.name}
+            </div>
           :
-          ''
+            ''
         }
         { 
           props.dialog?
           <div className={styles.main__head_div}>
             <label htmlFor="imageInput" className={`${styles.imageInputWrapper} ${rotateAddImage ? styles.rotateImage : ''}`}>
-              <img src={Add} onClick={selectedImage?handleClearFiles:''} className={`${styles.main__head_add} ${selectedImage ? styles.selectedImage : ''}`} alt="Add Image" />
+              <img src={Add} onClick={selectedImage?handleClearFiles:handleNothing} className={`${styles.main__head_add} ${selectedImage ? styles.selectedImage : ''}`} alt="Add Image" />
               {
                 selectedImage?
                 <></>

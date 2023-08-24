@@ -56,6 +56,7 @@ const MessageSend = (props) => {
             className={styles.imageFullscreen}
             alt=""
           />
+          
         </div>
       )}
 

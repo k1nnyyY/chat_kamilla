@@ -222,8 +222,8 @@ export const INVITE_TO_RENDEZVOUS_MUTATION = gql`
 `;
 
 export const READ_MESSAGES_MUTATION = gql`
-  mutation ReadMessages($messagesId: [Int!]!) {
-    readMessages(messagesId: $messagesId)
+  mutation ReadMessages($messagesId: [Int!]!, $dialog: String!) {
+    readMessages(messagesId: $messagesId, dialog: $dialog)
   }
 `;
 
