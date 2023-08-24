@@ -20,15 +20,15 @@ const Dialog = (props) => {
   const [showMessages, setShowMessages] = useState(true);
   const [localMess, setLocalMess] = useState([]);
   
-  const { data, loading, error } = useSubscription(RECEIVE_MESSAGE_SUBSCRIPTION, {
-  });
-    if (loading) {
-    return <p>Loading...</p>;
-  }
+  // const { data, loading, error } = useSubscription(RECEIVE_MESSAGE_SUBSCRIPTION, {
+  // });
+  //   if (loading) {
+  //   return <p>Loading...</p>;
+  // }
   
-  if(error){
-    return <p>Error {error.message}</p>
-  }
+  // if(error){
+  //   return <p>Error {error.message}</p>
+  // }
   
   // if(data){
   //   return <p>{data}</p>

@@ -42,7 +42,7 @@ const App = () => {
 
   return (
     <>
-      <ChatPage user={user} dialogs={dialogs}/>
+      {/* <ChatPage user={user} dialogs={dialogs}/> */}
       {/* <Submit></Submit> */}
       {/* <div>
         <img src={user.avatar.path} alt="User Avatar" />
