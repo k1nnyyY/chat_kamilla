@@ -8,7 +8,7 @@ import readM from '../../../assets/readM.png';
 
 const Message = (props) => {
   const [originalStatus, setOriginalStatus] = useState(true)
-
+  console.log(props)
   useEffect(()=>{
     if(props.readStatus.length>0){
       setOriginalStatus(false);
@@ -16,7 +16,7 @@ const Message = (props) => {
   }, [props.readStatus])
 
   const data = props.info ? props.info : null;
-  const inputDateString = data ? data.message.createdAt : null;
+  const inputDateString = data ? data?.message?.createdAt : null;
   const date = inputDateString ? parseISO(inputDateString) : null;
   const isTodayDate = date ? isToday(date) : null;
   const formattedTime = isTodayDate ? 
@@ -26,20 +26,20 @@ const Message = (props) => {
         format(date, 'd MMMM')
       :
         null
-  return formattedTime?
+  return formattedTime && data ?
     <div className={props.status===0?styles.main:styles.main_active}>
-      <img src={`https://storage.yandexcloud.net/${data.companion.avatar.path}`} className={styles.main__avatar} alt="" />
+      <img src={`https://storage.yandexcloud.net/${data?.companion?.avatar?.path}`} className={styles.main__avatar} alt="" />
       <div className={styles.main__text}>
-        <h5 className={styles.main__text_name}>{data.companion.firstname+' '+data.companion.lastname}</h5>
+        <h5 className={styles.main__text_name}>{data?.companion?.firstname+' '+data?.companion?.lastname}</h5>
         <div className={styles.main__text_message}>
         {
-          data.message.ownerId ===1?
+          data?.message?.ownerId ===1?
           <h6 className={styles.main__text_message_who}>
             {'Я:'}&nbsp;
           </h6>
           :
           <h6 className={styles.main__text_message_who}>
-            {data.message.owner.firstname+':'}&nbsp;
+            {data?.message?.owner?.firstname+':'}&nbsp;
           </h6>
         }
           <h6 className={styles.main__text_message}>

@@ -210,3 +210,21 @@ input[type="text"]::-webkit-search-decoration {
     max-height: 100px;
   }
   
+  .type {
+    height: 24px;
+    display: flex;
+    font-size: 14px;
+    align-items: center;
+    padding: 4px;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;
+
+  }
+
+  .type_h {
+    margin-left: 10px;
+    margin-bottom: 4px;
+    font-size: 12px;
+    opacity: .7;
+  }

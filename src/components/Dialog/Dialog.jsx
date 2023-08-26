@@ -3,7 +3,7 @@ import styles from './Dialog.module.css';
 import CusDate from './components/Date';
 import MessageSend from './components/MessageSend';
 import MessageGet from './components/MessageGet';
-import { SEND_MESSAGE_MUTATION, GET_MY_DIALOGS_QUERY, RECEIVE_MESSAGE_SUBSCRIPTION } from '../../query/queries.js';
+import { SEND_MESSAGE_MUTATION, GET_MY_DIALOGS_QUERY, RECEIVE_MESSAGE_SUBSCRIPTION, CHANGE_COMPANION_STATE, COMPANION_CONDITION_SUBSCRIPTION, SEND_IMAGE_MUTATION } from '../../query/queries.js';
 import { format } from 'date-fns';
 import { ServiceContext } from './../../apolloClient.jsx';
 
@@ -12,6 +12,9 @@ import Send from '../../assets/Send.png';
 
 const Dialog = (props) => {
   const { client, webSocketClient } = useContext(ServiceContext);
+
+  const dialogComp = props.dialog?.companion?.id;
+
 
   const [message, setMessage] = useState('');
   const [animateBorder, setAnimateBorder] = useState(false);
@@ -24,8 +27,53 @@ const Dialog = (props) => {
 
   const [newMessage, setNewMessage] = useState([]);
 
+  const [focus, setFocus] = useState(false);
+
+  const [isType, setIsType] = useState({
+    state:false,
+    companion: null,
+  });
+
   let currentDate = '';
   let stepDate = '';
+
+  const handleInputFocus = () => {
+    setFocus(true);
+    console.log('Input is now active.');
+    client.mutate({
+      mutation: CHANGE_COMPANION_STATE,
+      variables: {
+          input: {
+            state: 'START_TYPING',
+            targetId: props.dialog.companion.id
+        },
+      },
+    }).then(response => {
+      console.log('Mutation response:', response.data, props);
+    }).catch(error => {
+      console.error('Mutation error:', error);
+    });
+  }
+
+  const handleInputBlur = () => {
+    setFocus(false);
+    console.log('Input lost focus.');
+    client.mutate({
+      mutation: CHANGE_COMPANION_STATE,
+      variables: {
+          input: {
+            state: 'END_TYPING',
+            targetId: props.dialog.companion.id
+        },
+      },
+    }).then(response => {
+      console.log('Mutation response:', response.data);
+    }).catch(error => {
+      console.error('Mutation error:', error);
+    });
+}
+
+
 
   useEffect(() => {
     if (props.dialog === null) {
@@ -35,6 +83,41 @@ const Dialog = (props) => {
     }
     console.log(props.dialog, showMessages, reversedMessages)
   }, [props.dialog]);
+
+  useEffect(()=>{
+    const subscription = webSocketClient.subscribe({
+      query: COMPANION_CONDITION_SUBSCRIPTION,
+    }).subscribe({
+      next(res){
+        console.log('RECEIVE_MESSAGE_SUBSCRIPTION Response: ', res.data.companionCondition, dialogComp)
+        if (props.dialog.companion.id===res.data.companionCondition.companion){
+          if(res.data.companionCondition.state==='START_TYPING'){
+            console.log(props.dialog.companion.id, res.data.companionCondition.companion, props)
+            setIsType({
+              type: true,
+              companion: props.dialog.companion.id,
+            })
+            
+          } else if (res.data.companionCondition.state==='END_TYPING'){
+            console.log(props.dialog.companion.id, res.data.companionCondition.companion, props)
+            setIsType({
+              type: false,
+              companion: null,
+            })
+          }
+        }
+      },
+      error(error){
+        console.error('RECEIVE_MESSAGE_SUBSCRIPTION Error: ', error)
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    }
+  }, [props])
+
+
 
   useEffect(()=>{
     const subscription = webSocketClient.subscribe({
@@ -106,7 +189,7 @@ const Dialog = (props) => {
       setAnimateBorder(true);
       setTimeout(() => {setAnimateBorder(false)}, 1000);
     } else {
-      console.log(props.dialog)
+      console.log(props)
       try {
         if(message.trim() !== ''){
           client.mutate({
@@ -125,6 +208,7 @@ const Dialog = (props) => {
           }).catch(error => {
             console.error('Mutation error:', error, nonReadedMessagesId, selectedDialogToken?.token);
           });
+
       // }
       //   if(selectedImage instanceof File){
       //     const response = await sendImageMutation({
@@ -139,6 +223,30 @@ const Dialog = (props) => {
       //     })
       //     console.log('Image sent:', response.data.sendMessage);
         }
+
+        if(selectedImage instanceof File){
+          const files = new FormData;
+          files.append('file',selectedImage);
+          client.mutate({
+            mutation: SEND_IMAGE_MUTATION,
+            variables: {
+                input: {
+                  file: files,
+                  companion: props.dialog.companion.id,
+                  dialogToken: props.dialog.token,
+                },
+            },
+            context: {
+              clientName: 'storage'
+            }
+          }).then(response => {
+            // const updatedMessages = [...newMessage, response.data.sendMessage];
+            // setNewMessage(updatedMessages);
+            console.log('Mutation response:', response.data);
+          }).catch(error => {
+            console.error('Mutation error:', error);
+          });}
+
         setSelectedImage(null)
         setRotateAddImage(false);
         setSelectedImagePreview(null)
@@ -234,7 +342,7 @@ const Dialog = (props) => {
               if(formattedDate!==currentDate){
                 stepDate = formattedDate;
               };
-              if(el.ownerId===1){
+              if(el.ownerId===props.user.id){
                 return(
                     formattedDate!==currentDate?
                     <>
@@ -331,6 +439,19 @@ const Dialog = (props) => {
             </>        
         }
       </div> )}
+      {
+          isType.type && isType.companion===props.dialog.companion.id?
+          <div className={styles.type}>
+            <h6 className={styles.type_h}>
+              {props.dialog.companion.firstname+' печатает...'}
+            </h6>
+          </div>
+          :
+          <div className={styles.type}>
+          
+          </div>
+        }
+
       <div className={styles.main__head}>
       {selectedImagePreview && (
         <div className={styles.selectedImagePreview}>
@@ -363,7 +484,7 @@ const Dialog = (props) => {
               />
               }
             </label>
-            <input type="text" value={message} onKeyDown={handleKeyDown} onChange={e=>handleMessage(e)}  className={`${styles.main__head_input} ${animateBorder ? styles.animate_border : ''}`} placeholder='Введите сообщение...'/>
+            <input type="text" onFocus={handleInputFocus} onBlur={handleInputBlur} value={message} onKeyDown={handleKeyDown} onChange={e=>handleMessage(e)}  className={`${styles.main__head_input} ${animateBorder ? styles.animate_border : ''}`} placeholder='Введите сообщение...'/>
             <img src={Send} onClick={handleSubmit} className={styles.main__head_send} alt="" />
           </div>
           :

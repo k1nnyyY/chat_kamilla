@@ -407,7 +407,7 @@ export const SEND_IMAGE_MUTATION = gql`
   }
 `;
 
-const SEND_IMAGE_INPUT = gql`
+export const SEND_IMAGE_INPUT = gql`
   input SendImageInput {
     file: Upload!
     message: String
@@ -416,5 +416,24 @@ const SEND_IMAGE_INPUT = gql`
     dialogToken: String
     chatRoomId: Int
     inReply: Int
+  }
+`;
+
+export const CHANGE_COMPANION_STATE = gql`
+  mutation ChangeCompanionState($input: CompanionStateInput!) {
+    changeCompanionState(input: $input)
+  }
+`;
+
+
+export const COMPANION_CONDITION_SUBSCRIPTION = gql`
+  subscription CompanionCondition {
+    companionCondition {
+      isOnline
+      companion
+      dialogToken
+      lastTimeDialogOnline
+      state
+    }
   }
 `;
