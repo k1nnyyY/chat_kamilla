@@ -12,9 +12,7 @@ import Send from '../../assets/Send.png';
 
 const Dialog = (props) => {
   const { client, webSocketClient } = useContext(ServiceContext);
-
   const dialogComp = props.dialog?.companion?.id;
-
 
   const [message, setMessage] = useState('');
   const [animateBorder, setAnimateBorder] = useState(false);
@@ -24,13 +22,10 @@ const Dialog = (props) => {
   const [showMessages, setShowMessages] = useState(true);
   const [localMess, setLocalMess] = useState([]);
   const messagesContainerRef = useRef();
-
   const [newMessage, setNewMessage] = useState([]);
-
   const [focus, setFocus] = useState(false);
-
   const [isType, setIsType] = useState({
-    state:false,
+    state: false,
     companion: null,
   });
 
@@ -49,7 +44,7 @@ const Dialog = (props) => {
         },
       },
     }).then(response => {
-      console.log('Mutation response:', response.data, props);
+      console.log('START_TYPING mutation response:', response.data, props);
     }).catch(error => {
       console.error('Mutation error:', error);
     });
@@ -67,7 +62,7 @@ const Dialog = (props) => {
         },
       },
     }).then(response => {
-      console.log('Mutation response:', response.data);
+      console.log('END_TYPING mutation response:', response.data);
     }).catch(error => {
       console.error('Mutation error:', error);
     });
@@ -96,7 +91,6 @@ const Dialog = (props) => {
               type: true,
               companion: props.dialog.companion.id,
             })
-            
           } else if (res.data.companionCondition.state==='END_TYPING'){
             setIsType({
               type: false,
@@ -111,7 +105,6 @@ const Dialog = (props) => {
     });
 
     return () => {
-      
       subscription.unsubscribe();
     }
   }, [props])
@@ -154,11 +147,24 @@ const Dialog = (props) => {
             createdAt: res.data.receiveMessage.createdAt,
             ownerId: res.data.receiveMessage.ownerId,
           };
+        };
 
-        }
         console.log(updatedLastMessages)
         props.setLastMessages(updatedLastMessages);
         console.log(props.lastMessages)
+
+        const updatedDialogs = [...props.dialogs];
+        const indexDialogToUpdate = updatedDialogs.findIndex(dialog => dialog.token === res.data.receiveMessage.dialog)
+        if (indexDialogToUpdate !== -1 && indexDialogToUpdate !== 0) {
+          const dialogToUpdate = updatedDialogs.splice(indexDialogToUpdate, 1)[0]; // Извлекаем диалог для перемещения
+          updatedDialogs.unshift(dialogToUpdate);
+        };
+
+        props.setDialogs(updatedDialogs);
+        if (indexDialogToUpdate === props.selectedDialog){
+          props.setSelectedDialog(0)
+        };
+
         setNewMessage(prevMessages => [...prevMessages, res.data.receiveMessage]);
         console.log('RECEIVE_MESSAGE_SUBSCRIPTION Response: ', res.data.receiveMessage)
       },
@@ -171,18 +177,6 @@ const Dialog = (props) => {
       subscription.unsubscribe();
     }
   }, [props])
-
-  useEffect(()=>{
-    client.query({
-      query: GET_MY_DIALOGS_QUERY,
-    }).then(response => {
-      console.log('NEW',response.data.getMyDialogs[0]);
-      props.setDialogs(response.data.getMyDialogs);
-    }).catch(error => {
-      console.log(error);
-    });
-  }, [newMessage.length])
-
 
   const handleImageUpload = (e) => {
       const newSelectedImage = e.target.files[0];
@@ -246,8 +240,19 @@ const Dialog = (props) => {
                 ownerId: response.data.sendMessage.ownerId,
               };
             }
-            console.log(updatedLastMessages)
             props.setLastMessages(updatedLastMessages);
+
+            const updatedDialogs = [...props.dialogs];
+            const indexDialogToUpdate = updatedDialogs.findIndex(dialog => dialog.token === props.dialog.token)
+            if (indexDialogToUpdate !== -1 && indexDialogToUpdate !== 0) {
+              const dialogToUpdate = updatedDialogs.splice(indexDialogToUpdate, 1)[0]; // Извлекаем диалог для перемещения
+              updatedDialogs.unshift(dialogToUpdate);
+            }
+            props.setDialogs(updatedDialogs);
+            if (indexDialogToUpdate === props.selectedDialog){
+              props.setSelectedDialog(0)
+            }
+            console.log('CHECK: ', updatedDialogs);
 
             const updatedMessages = [...newMessage, response.data.sendMessage];
             setNewMessage(updatedMessages);

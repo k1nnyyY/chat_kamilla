@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect, useContext, use } from 'react'
 import styles from './ChatPage.module.css';
 import MessageList from '../components/MessagesList/MessageList';
 import Dialog from '../components/Dialog/Dialog';
@@ -7,13 +7,11 @@ import { GET_MESSAGES_QUERY, READ_MESSAGES_MUTATION } from "./../query/queries";
 
 const ChatPage = (props) => {
   const { client } = useContext(ServiceContext);
-
   const [selectedDialogToken, setSelectedDialogToken] = useState(null);
   const [messages, setMessages] = useState([]);
   const [readStatus, setReadStatus] = useState([])
   const [newMessage, setNewMessage] = useState([]);
-
-
+  const [selectedDialog, setSelectedDialog] = useState(null);
 
   useEffect(()=>{
     let nonReadedMessagesId = null;
@@ -64,8 +62,8 @@ const ChatPage = (props) => {
 
   return (
     <div className={styles.main}>
-      <MessageList lastMessages={props.lastMessages} setLastMessages={props.setLastMessages}  readStatus={readStatus} user={props.user} newMessage={newMessage} setDialogs={props.setDialogs} dialogs={props.dialogs} setToken={setSelectedDialogToken}/>
-      <Dialog lastMessages={props.lastMessages} setLastMessages={props.setLastMessages} dialog={selectedDialogToken} messages={messages?messages:''} newMessage={newMessage} user={props.user} setDialogs={props.setDialogs}/>
+      <MessageList selectedDialog={selectedDialog} setSelectedDialog={setSelectedDialog} lastMessages={props.lastMessages} setLastMessages={props.setLastMessages}  readStatus={readStatus} user={props.user} newMessage={newMessage} setDialogs={props.setDialogs} dialogs={props.dialogs} setToken={setSelectedDialogToken}/>
+      <Dialog selectedDialog={selectedDialog} setSelectedDialog={setSelectedDialog} lastMessages={props.lastMessages} setLastMessages={props.setLastMessages} dialog={selectedDialogToken} messages={messages?messages:''} newMessage={newMessage} user={props.user} dialogs={props.dialogs} setDialogs={props.setDialogs}/>
     </div>
   )
 }
