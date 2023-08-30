@@ -13,6 +13,8 @@ const ChatPage = (props) => {
   const [readStatus, setReadStatus] = useState([])
   const [newMessage, setNewMessage] = useState([]);
 
+
+
   useEffect(()=>{
     let nonReadedMessagesId = null;
     client.query({
@@ -55,10 +57,15 @@ const ChatPage = (props) => {
 
   },[selectedDialogToken])
 
+  useEffect(()=>{
+    console.log(props.lastMessages)
+  }, [props.lastMessages])
+
+
   return (
     <div className={styles.main}>
-      <MessageList readStatus={readStatus} user={props.user} newMessage={newMessage} setDialogs={props.setDialogs} dialogs={props.dialogs} setToken={setSelectedDialogToken}/>
-      <Dialog dialog={selectedDialogToken} messages={messages?messages:''} newMessage={newMessage} user={props.user} setDialogs={props.setDialogs}/>
+      <MessageList lastMessages={props.lastMessages} setLastMessages={props.setLastMessages}  readStatus={readStatus} user={props.user} newMessage={newMessage} setDialogs={props.setDialogs} dialogs={props.dialogs} setToken={setSelectedDialogToken}/>
+      <Dialog lastMessages={props.lastMessages} setLastMessages={props.setLastMessages} dialog={selectedDialogToken} messages={messages?messages:''} newMessage={newMessage} user={props.user} setDialogs={props.setDialogs}/>
     </div>
   )
 }

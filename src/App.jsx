@@ -8,6 +8,7 @@ function App() {
   const { client, webSocketClient } = useContext(ServiceContext);
   const [dialogs, setDialogs] = useState([]);
   const [user, setUser] = useState({});
+  const [lastMessages, setLastMessages] = useState([])
 
   useEffect(()=>{
     client.query({
@@ -15,6 +16,21 @@ function App() {
     }).then(response => {
       console.log(response.data.getMyDialogs);
       setDialogs(response.data.getMyDialogs);
+      let lastMess = [];
+      response.data.getMyDialogs.forEach((v,i)=>{
+        console.log(v, i)
+        lastMess.push({
+          dialog: v.token,
+          lastMessage: v.message?.message,
+          ownerId: v.message?.ownerId,
+          createdAt: v.message?.createdAt,
+          isRead: v.message?.isRead,
+        });
+        console.log(lastMess)
+      })
+      setLastMessages(lastMess);
+      console.log(lastMessages)
+
     }).catch(error => {
       console.log(error);
     });
@@ -38,7 +54,7 @@ function App() {
 
   return (
     <>
-      <ChatPage dialogs={dialogs} setDialogs={setDialogs} user={user}></ChatPage>
+      <ChatPage lastMessages={lastMessages} setLastMessages={setLastMessages} dialogs={dialogs} setDialogs={setDialogs} user={user}></ChatPage>
     </>
   )
 }

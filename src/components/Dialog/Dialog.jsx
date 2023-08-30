@@ -3,7 +3,7 @@ import styles from './Dialog.module.css';
 import CusDate from './components/Date';
 import MessageSend from './components/MessageSend';
 import MessageGet from './components/MessageGet';
-import { SEND_MESSAGE_MUTATION, GET_MY_DIALOGS_QUERY, RECEIVE_MESSAGE_SUBSCRIPTION, CHANGE_COMPANION_STATE, COMPANION_CONDITION_SUBSCRIPTION, SEND_IMAGE_MUTATION } from '../../query/queries.js';
+import { SEND_MESSAGE_MUTATION, GET_MY_DIALOGS_QUERY, READ_MESSAGES_MUTATION, RECEIVE_MESSAGE_SUBSCRIPTION, CHANGE_COMPANION_STATE, COMPANION_CONDITION_SUBSCRIPTION, SEND_IMAGE_MUTATION } from '../../query/queries.js';
 import { format } from 'date-fns';
 import { ServiceContext } from './../../apolloClient.jsx';
 
@@ -89,17 +89,15 @@ const Dialog = (props) => {
       query: COMPANION_CONDITION_SUBSCRIPTION,
     }).subscribe({
       next(res){
-        console.log('RECEIVE_MESSAGE_SUBSCRIPTION Response: ', res.data.companionCondition, dialogComp)
+        console.log('COMPANION_CONDITION_SUBSCRIPTION Response: ', res.data.companionCondition, dialogComp)
         if (props.dialog.companion.id===res.data.companionCondition.companion){
           if(res.data.companionCondition.state==='START_TYPING'){
-            console.log(props.dialog.companion.id, res.data.companionCondition.companion, props)
             setIsType({
               type: true,
               companion: props.dialog.companion.id,
             })
             
           } else if (res.data.companionCondition.state==='END_TYPING'){
-            console.log(props.dialog.companion.id, res.data.companionCondition.companion, props)
             setIsType({
               type: false,
               companion: null,
@@ -113,6 +111,7 @@ const Dialog = (props) => {
     });
 
     return () => {
+      
       subscription.unsubscribe();
     }
   }, [props])
@@ -124,7 +123,42 @@ const Dialog = (props) => {
       query: RECEIVE_MESSAGE_SUBSCRIPTION,
     }).subscribe({
       next(res){
-        // const updatedMessages = [...newMessage, res.data.receiveMessage];
+        let RD = false
+        if(props.dialog.companion.id===res.data.receiveMessage.ownerId){
+          client.mutate({
+            mutation: READ_MESSAGES_MUTATION,
+            variables: {
+              messagesId: res.data.receiveMessage.id,
+              dialog: props?.dialog?.token,
+            },
+          }).then(response => {
+            RD=true;
+            console.log('Mutation response:', response);
+          }).catch(error => {
+            console.error('Mutation error:', error, nonReadedMessagesId, selectedDialogToken?.token);
+          });
+        }
+        
+        // Копируем массив lastMessages
+        const updatedLastMessages = [...props.lastMessages];
+
+        // Находим индекс объекта, который нужно обновить
+        const indexToUpdate = updatedLastMessages.findIndex(message => message.dialog === res.data.receiveMessage.dialog);
+
+        if (indexToUpdate !== -1) {
+          // Обновляем нужный объект
+          updatedLastMessages[indexToUpdate] = {
+            ...updatedLastMessages[indexToUpdate],
+            lastMessage: res.data.receiveMessage.message, // Обновляем текст последнего сообщения, например
+            isRead: RD,
+            createdAt: res.data.receiveMessage.createdAt,
+            ownerId: res.data.receiveMessage.ownerId,
+          };
+
+        }
+        console.log(updatedLastMessages)
+        props.setLastMessages(updatedLastMessages);
+        console.log(props.lastMessages)
         setNewMessage(prevMessages => [...prevMessages, res.data.receiveMessage]);
         console.log('RECEIVE_MESSAGE_SUBSCRIPTION Response: ', res.data.receiveMessage)
       },
@@ -136,7 +170,7 @@ const Dialog = (props) => {
     return () => {
       subscription.unsubscribe();
     }
-  }, [])
+  }, [props])
 
   useEffect(()=>{
     client.query({
@@ -189,7 +223,6 @@ const Dialog = (props) => {
       setAnimateBorder(true);
       setTimeout(() => {setAnimateBorder(false)}, 1000);
     } else {
-      console.log(props)
       try {
         if(message.trim() !== ''){
           client.mutate({
@@ -202,28 +235,27 @@ const Dialog = (props) => {
                 },
             },
           }).then(response => {
+            const updatedLastMessages = [...props.lastMessages];
+            const indexToUpdate = updatedLastMessages.findIndex(message => message.dialog === props.dialog.token);
+            if (indexToUpdate !== -1) {
+              updatedLastMessages[indexToUpdate] = {
+                ...updatedLastMessages[indexToUpdate],
+                lastMessage: response.data.sendMessage.message, // Обновляем текст последнего сообщения, например
+                isRead: response.data.sendMessage.isRead,
+                createdAt: response.data.sendMessage.createdAt,
+                ownerId: response.data.sendMessage.ownerId,
+              };
+            }
+            console.log(updatedLastMessages)
+            props.setLastMessages(updatedLastMessages);
+
             const updatedMessages = [...newMessage, response.data.sendMessage];
             setNewMessage(updatedMessages);
             console.log('Mutation response:', response.data.sendMessage);
           }).catch(error => {
             console.error('Mutation error:', error, nonReadedMessagesId, selectedDialogToken?.token);
           });
-
-      // }
-      //   if(selectedImage instanceof File){
-      //     const response = await sendImageMutation({
-      //       variables: {
-      //         input: {
-      //           file: selectedImage,
-      //         }
-      //       },
-      //       context: {
-      //         clientName: 'storage'
-      //       }
-      //     })
-      //     console.log('Image sent:', response.data.sendMessage);
         }
-
         if(selectedImage instanceof File){
           const files = new FormData;
           files.append('file',selectedImage);
@@ -254,14 +286,6 @@ const Dialog = (props) => {
   
         const date = Date.now();   
         const formattedTime = format(date, 'HH:mm');
-        // localMess.push({
-        //   message: message,
-        //   createdAt: formattedTime,
-        //   image: null,
-        //   type: 'send',
-        //   token: props.dialog.token,
-        //   ownerId: props.user.id
-        // });
         props.newMessage.push({
           message: message,
           createdAt: formattedTime,
@@ -270,7 +294,6 @@ const Dialog = (props) => {
           token: props.dialog.token,
           ownerId: props.user.id
         });
-        console.log('LocalMess: ',localMess)
       } catch (error) {
         console.error('Dialog.jsx error sending message:', error);
       }
@@ -282,8 +305,7 @@ const Dialog = (props) => {
   };
 
   let reversedMessages = props.messages.getMessages ? props.messages.getMessages.slice().sort((a, b) => {return new Date(a.createdAt) - new Date(b.createdAt)}): null;
-
-  
+ 
   useEffect(() => {
     if (messagesContainerRef.current) {
       const { scrollHeight, clientHeight } = messagesContainerRef.current;
@@ -291,9 +313,7 @@ const Dialog = (props) => {
     }
   }, [reversedMessages]);
 
-  const handleNothing = () => {
-
-  };
+  const handleNothing = () => {};
 
   return (
     <div className={styles.main}>
@@ -407,7 +427,7 @@ const Dialog = (props) => {
               if(formattedDate!==currentDate){
                 stepDate = formattedDate;
               };
-              if(el.ownerId===1){
+              if(el.ownerId===props.user.id){
                 return(
                     formattedDate!==currentDate?
                     <>
@@ -435,7 +455,6 @@ const Dialog = (props) => {
             })
             // ! --------------------------
           }
-
             </>        
         }
       </div> )}

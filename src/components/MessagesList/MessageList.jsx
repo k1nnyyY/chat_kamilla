@@ -59,9 +59,15 @@ const MessageList = (props) => {
         <input type="search" value={search} onChange={handleSearch} onKeyDown={handleKeyDown} className={styles.main__search} placeholder='Поиск по id'/>
         <div className={styles.main__dialogs}>
           {dialogs ? dialogs.map((d, idx) => (
-            <div className={styles.main__dialogs_link} onClick={() => handleSelector(idx)} key={idx}>
-              <Message user={props.user} newMessage={props.newMessage} status={selectedDialog === idx ? 1 : 0} readStatus={props.readStatus?.filter((el)=>{return el.dialog===dialogs[idx]?.token})} info={dialogs[idx]} />
-            </div>
+            props.lastMessages.map((d2,idx2)=>(
+              d2.dialog===d.token?
+                <div className={styles.main__dialogs_link} onClick={() => handleSelector(idx)} key={idx}>
+                  {console.log(d2,d)}
+                  <Message lastMessages={d2} user={props.user} newMessage={props.newMessage} status={selectedDialog === idx ? 1 : 0} readStatus={props.readStatus?.filter((el)=>{return el.dialog===dialogs[idx]?.token})} info={dialogs[idx]} />
+                </div>
+              :
+              <></>
+            ))
           )) : 
           <></>}
         </div>
